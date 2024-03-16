@@ -117,4 +117,73 @@ router.post(
   }
 );
 
+
+// Create a new project
+router.post('/projects', (req, res) => {
+  const { title, description, supervisor_name, graduation_year, graduation_term, department_name, project_image_path, github_link } = req.body;
+  // Insert project into database with default values for approval_status and total_votes
+  conn.query('INSERT INTO Projects (title, description, supervisor_name, graduation_year, graduation_term, department_name, project_image_path, github_link, approval_status, total_votes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, "pending", 0)', [title, description, supervisor_name, graduation_year, graduation_term, department_name, project_image_path, github_link], (err, result) => {
+    if (err) {
+      res.status(500).json({ error: 'Error creating project' });
+    } else {
+      res.status(201).json({ message: 'Project created successfully' });
+    }
+  });
+});
+
+// Get a list of all projects with selected fields
+router.get('/projects', (req, res) => {
+  // Fetch all projects from database with selected fields
+  conn.query('SELECT project_id, title, description, supervisor_name, graduation_year, graduation_term, department_name, project_image_path, github_link, approval_status, total_votes FROM Projects', (err, results) => {
+    if (err) {
+      res.status(500).json({ error: 'Error fetching projects' });
+    } else {
+      res.status(200).json(results);
+    }
+  });
+});
+
+// Get details of a specific project by ID with selected fields
+router.get('/projects/:id', (req, res) => {
+  const projectId = req.params.id;
+  // Fetch project from database by ID with selected fields
+  conn.query('SELECT project_id, title, description, supervisor_name, graduation_year, graduation_term, department_name, project_image_path, github_link, IFNULL(approval_status, "pending") AS approval_status, IFNULL(total_votes, 0) AS total_votes FROM Projects WHERE project_id = ?', [projectId], (err, results) => {
+    if (err) {
+      res.status(500).json({ error: 'Error fetching project' });
+    } else if (results.length === 0) {
+      res.status(404).json({ error: 'Project not found' });
+    } else {
+      res.status(200).json(results[0]);
+    }
+  });
+});
+
+// Update an existing project by ID
+router.put('/projects/:id', (req, res) => {
+  const projectId = req.params.id;
+  const { title, description, supervisor_name, graduation_year, graduation_term, department_name, project_image_path, github_link } = req.body;
+  // Update project in database by ID
+  conn.query('UPDATE Projects SET title = ?, description = ?, supervisor_name = ?, graduation_year = ?, graduation_term = ?, department_name = ?, project_image_path = ?, github_link = ? WHERE project_id = ?', [title, description, supervisor_name, graduation_year, graduation_term, department_name, project_image_path, github_link, projectId], (err, result) => {
+    if (err) {
+      res.status(500).json({ error: 'Error updating project' });
+    } else {
+      res.status(200).json({ message: 'Project updated successfully' });
+    }
+  });
+});
+
+// Delete a project by ID
+router.delete('/projects/:id', (req, res) => {
+  const projectId = req.params.id;
+  // Delete project from database by ID
+  conn.query('DELETE FROM Projects WHERE project_id = ?', [projectId], (err, result) => {
+    if (err) {
+      res.status(500).json({ error: 'Error deleting project' });
+    } else {
+      res.status(200).json({ message: 'Project deleted successfully' });
+    }
+  });
+});
+
+
 module.exports = router;
