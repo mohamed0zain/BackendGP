@@ -1,9 +1,14 @@
 const router = require("express").Router();
 const conn = require("../db/dbConnection");
 const { body, validationResult } = require("express-validator");
-const util = require("util"); // helper
+const util = require("util"); 
 const bcrypt = require("bcrypt");
 const crypto = require("crypto");
+const multer = require("multer");
+const path = require("path");
+
+
+//---------------------------------------START OF AUTHENTICATION----------------------------------------------------
 
 // LOGIN
 router.post(
@@ -117,21 +122,42 @@ router.post(
   }
 );
 
+//------------------------------------END OF AUTHENTICATION--------------------------------------------------------
+
+
+//-----------------------------------START OF PROJECTS PAGE--------------------------------------------------------
+
+// Set up multer storage ------------Handels The Poject Images-----------
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, "project_images/"); // Specify the folder where uploaded images will be stored
+  },
+  filename: function (req, file, cb) {
+    cb(null, Date.now() + path.extname(file.originalname)); // Generate a unique filename
+  },
+});
+// Initialize multer instance 
+const upload = multer({ storage: storage });
 
 // Create a new project
-router.post('/projects', (req, res) => {
-  const { title, description, supervisor_name, graduation_year, graduation_term, department_name, project_image_path, github_link } = req.body;
+router.post("/projects", upload.single("projectImage"), (req, res) => {
+  const { title, description, supervisor_name, graduation_year, graduation_term, department_name, github_link } = req.body;
+  const project_image_path = req.file.path; // Get the path to the uploaded image
   // Insert project into database with default values for approval_status and total_votes
-  conn.query('INSERT INTO Projects (title, description, supervisor_name, graduation_year, graduation_term, department_name, project_image_path, github_link, approval_status, total_votes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, "pending", 0)', [title, description, supervisor_name, graduation_year, graduation_term, department_name, project_image_path, github_link], (err, result) => {
-    if (err) {
-      res.status(500).json({ error: 'Error creating project' });
-    } else {
-      res.status(201).json({ message: 'Project created successfully' });
+  conn.query(
+    "INSERT INTO Projects (title, description, supervisor_name, graduation_year, graduation_term, department_name, project_image_path, github_link, approval_status, total_votes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending', 0)",
+    [title, description, supervisor_name, graduation_year, graduation_term, department_name, project_image_path, github_link],
+    (err, result) => {
+      if (err) {
+        res.status(500).json({ error: "Error creating project" });
+      } else {
+        res.status(201).json({ message: "Project created successfully" });
+      }
     }
-  });
+  );
 });
 
-// Get a list of all projects with selected fields
+// Get a list of all projects 
 router.get('/projects', (req, res) => {
   // Fetch all projects from database with selected fields
   conn.query('SELECT project_id, title, description, supervisor_name, graduation_year, graduation_term, department_name, project_image_path, github_link, approval_status, total_votes FROM Projects', (err, results) => {
@@ -143,7 +169,7 @@ router.get('/projects', (req, res) => {
   });
 });
 
-// Get details of a specific project by ID with selected fields
+// Get details of a specific project by ID 
 router.get('/projects/:id', (req, res) => {
   const projectId = req.params.id;
   // Fetch project from database by ID with selected fields
@@ -184,6 +210,7 @@ router.delete('/projects/:id', (req, res) => {
     }
   });
 });
+//-------------------------------------------------END OF PROJECTS PAGE-------------------------------------------------------
 
 
 module.exports = router;
