@@ -213,4 +213,26 @@ router.delete('/projects/:id', (req, res) => {
 //-------------------------------------------------END OF PROJECTS PAGE-------------------------------------------------------
 
 
+//--------------------------------------------------START OF VOTES--------------------------------------------------------
+
+// Add a new vote to a project
+router.post("/projects/:id/votes", async (req, res) => {
+  const projectId = req.params.id;
+  const timestamp = new Date().toISOString(); // Get current timestamp
+
+  try {
+    // Insert new vote into the database
+    await conn.query(
+      "INSERT INTO Votes (project_id, timestamp) VALUES (?, ?)",
+      [projectId, timestamp]
+    );
+
+    res.status(201).json({ message: "Vote added successfully" });
+  } catch (err) {
+    console.error("Error adding vote:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+//--------------------------------------------------END OF VOTES--------------------------------------------------------
+
 module.exports = router;
