@@ -139,23 +139,44 @@ const storage = multer.diskStorage({
 // Initialize multer instance 
 const upload = multer({ storage: storage });
 
+
 // Create a new project
-router.post("/projects", upload.single("projectImage"), (req, res) => {
-  const { title, description, supervisor_name, graduation_year, graduation_term, department_name, github_link } = req.body;
-  const project_image_path = req.file.path; // Get the path to the uploaded image
-  // Insert project into database with default values for approval_status and total_votes
-  conn.query(
-    "INSERT INTO Projects (title, description, supervisor_name, graduation_year, graduation_term, department_name, project_image_path, github_link, approval_status, total_votes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending', 0)",
-    [title, description, supervisor_name, graduation_year, graduation_term, department_name, project_image_path, github_link],
-    (err, result) => {
-      if (err) {
-        res.status(500).json({ error: "Error creating project" });
-      } else {
-        res.status(201).json({ message: "Project created successfully" });
-      }
+router.post("/projects", upload.single("projectImage"), async (req, res) => {
+  const { title, description, supervisor_name, graduation_year, graduation_term, department_name, github_link, leader_email } = req.body;
+
+  try {
+    // Check if the email provided exists in the Users table
+    const query = util.promisify(conn.query).bind(conn);
+    const user = await query("SELECT * FROM Users WHERE email = ?", [leader_email]);
+    if (user.length === 0) {
+      return res.status(404).json({ error: "User with provided email not found" });
     }
-  );
+
+    // If user found, proceed to save project
+    const project_image_path = req.file ? req.file.path : null; // Get the path to the uploaded image
+
+    // Insert project into database with default values for approval_status and total_votes
+    await conn.query(
+      "INSERT INTO Projects (title, description, supervisor_name, graduation_year, graduation_term, department_name, project_image_path, github_link, leader_email, approval_status, total_votes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', 0)",
+      [title, description, supervisor_name, graduation_year, graduation_term, department_name, project_image_path, github_link, leader_email]
+    );
+
+    // If project insertion successful, image has been saved successfully
+    res.status(201).json({ message: "Project created successfully" });
+  } catch (err) {
+    console.error("Error creating project:", err);
+    // If project insertion failed, delete the uploaded image if it exists
+    if (req.file) {
+      fs.unlink(req.file.path, (unlinkErr) => {
+        if (unlinkErr) {
+          console.error("Error deleting uploaded image:", unlinkErr);
+        }
+      });
+    }
+    res.status(500).json({ error: "Server error" });
+  }
 });
+
 
 // Get a list of all projects 
 router.get('/projects', (req, res) => {
@@ -227,12 +248,19 @@ router.post("/projects/:id/votes", async (req, res) => {
       [projectId, timestamp]
     );
 
+    // Update total_votes in Projects table
+    await conn.query(
+      "UPDATE Projects SET total_votes = total_votes + 1 WHERE project_id = ?",
+      [projectId]
+    );
+
     res.status(201).json({ message: "Vote added successfully" });
   } catch (err) {
     console.error("Error adding vote:", err);
     res.status(500).json({ error: "Server error" });
   }
 });
+
 //--------------------------------------------------END OF VOTES--------------------------------------------------------
 
 module.exports = router;
