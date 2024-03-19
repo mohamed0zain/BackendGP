@@ -1,7 +1,7 @@
 const router = require("express").Router();
 const conn = require("../db/dbConnection");
 const { body, validationResult } = require("express-validator");
-const util = require("util"); 
+const util = require("util");
 const bcrypt = require("bcrypt");
 const crypto = require("crypto");
 const multer = require("multer");
@@ -47,6 +47,9 @@ router.post(
       );
       if (checkPassword) {
         delete user[0].password;
+        const newToken = crypto.randomBytes(16).toString("hex");
+        user[0].token = newToken;
+        await query('UPDATE users SET token = ? WHERE id = ?', [newToken, user[0].id]);
         res.status(200).json(user[0]);
       } else {
         res.status(404).json({
@@ -67,11 +70,11 @@ router.post(
 router.post(
   "/register",
   body("email").isEmail().withMessage("please enter a valid email!")
-  .custom(value => {
-    if (!value.endsWith("@fci.helwan.edu.eg")) {
-      throw new Error("Email domain must be '@fci.helwan.edu.eg'")
-    } return true;
-  }),
+    .custom(value => {
+      if (!value.endsWith("@fci.helwan.edu.eg")) {
+        throw new Error("Email domain must be '@fci.helwan.edu.eg'")
+      } return true;
+    }),
   body("name")
     .isString()
     .withMessage("please enter a valid name")
@@ -136,7 +139,7 @@ const storage = multer.diskStorage({
     cb(null, Date.now() + path.extname(file.originalname)); // Generate a unique filename
   },
 });
-// Initialize multer instance 
+// Initialize multer instance
 const upload = multer({ storage: storage });
 
 
@@ -178,7 +181,7 @@ router.post("/projects", upload.single("projectImage"), async (req, res) => {
 });
 
 
-// Get a list of all projects 
+// Get a list of all projects
 router.get('/projects', (req, res) => {
   // Fetch all projects from database with selected fields
   conn.query('SELECT project_id, title, description, supervisor_name, graduation_year, graduation_term, department_name, project_image_path, github_link, approval_status, total_votes FROM Projects', (err, results) => {
@@ -190,7 +193,7 @@ router.get('/projects', (req, res) => {
   });
 });
 
-// Get details of a specific project by ID 
+// Get details of a specific project by ID
 router.get('/projects/:id', (req, res) => {
   const projectId = req.params.id;
   // Fetch project from database by ID with selected fields
