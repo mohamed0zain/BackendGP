@@ -11,6 +11,7 @@ app.use(cors()); // ALLOW HTTP REQUESTS LOCAL HOSTS
 
 // ====================  Required Module ====================
 const auth = require("./routes/authentication");
+const logoutRouter = require('./routes/logout');
 
 // ====================  RUN THE APP  ====================
 app.listen(4000, "localhost", () => {
@@ -19,3 +20,4 @@ app.listen(4000, "localhost", () => {
 
 // ====================  API ROUTES [ ENDPOINTS ]  ====================
 app.use("/auth", auth);
+app.use(logoutRouter);
