@@ -7,7 +7,6 @@ const crypto = require("crypto");
 const multer = require("multer");
 const path = require("path");
 
-
 //---------------------------------------START OF AUTHENTICATION----------------------------------------------------
 
 // LOGIN
@@ -16,7 +15,7 @@ router.post(
   body("email").isEmail().withMessage("please enter a valid email!"),
   body("password")
     .isLength({ min: 8, max: 12 })
-    .withMessage("password should be between (8-12) character"),
+    .withMessage("password should be between (8-12) characters"),
   async (req, res) => {
     try {
       // 1- VALIDATION REQUEST [manual, express validation]
@@ -26,7 +25,7 @@ router.post(
       }
 
       // 2- CHECK IF EMAIL EXISTS
-      const query = util.promisify(conn.query).bind(conn); // transform query mysql --> promise to use [await/async]
+      const query = util.promisify(conn.query).bind(conn);
       const user = await query("select * from users where email = ?", [
         req.body.email,
       ]);
@@ -79,10 +78,10 @@ router.post(
     .isString()
     .withMessage("please enter a valid name")
     .isLength({ min: 10, max: 20 })
-    .withMessage("name should be between (10-20) character"),
+    .withMessage("name should be between (10-20) characters"),
   body("password")
     .isLength({ min: 8, max: 12 })
-    .withMessage("password should be between (8-12) character"),
+    .withMessage("password should be between (8-12) characters"),
   async (req, res) => {
     try {
       // 1- VALIDATION REQUEST [manual, express validation]
@@ -92,7 +91,7 @@ router.post(
       }
 
       // 2- CHECK IF EMAIL EXISTS
-      const query = util.promisify(conn.query).bind(conn); // transform query mysql --> promise to use [await/async]
+      const query = util.promisify(conn.query).bind(conn);
       const checkEmailExists = await query(
         "select * from users where email = ?",
         [req.body.email]
@@ -112,7 +111,7 @@ router.post(
         name: req.body.name,
         email: req.body.email,
         password: await bcrypt.hash(req.body.password, 10),
-        token: crypto.randomBytes(16).toString("hex"), // JSON WEB TOKEN, CRYPTO -> RANDOM ENCRYPTION STANDARD
+        token: crypto.randomBytes(16).toString("hex"),
       };
 
       // 4- INSERT USER OBJECT INTO DB
@@ -145,26 +144,17 @@ const upload = multer({ storage: storage });
 
 // Create a new project
 router.post("/projects", upload.single("projectImage"), async (req, res) => {
-  const { title, description, supervisor_name, graduation_year, graduation_term, department_name, github_link, leader_email } = req.body;
+  const { title, description, supervisor_name, graduation_year, graduation_term, department_name, github_link } = req.body;
 
   try {
-    // Check if the email provided exists in the Users table
-    const query = util.promisify(conn.query).bind(conn);
-    const user = await query("SELECT * FROM Users WHERE email = ?", [leader_email]);
-    if (user.length === 0) {
-      return res.status(404).json({ error: "User with provided email not found" });
-    }
-
-    // If user found, proceed to save project
     const project_image_path = req.file ? req.file.path : null; // Get the path to the uploaded image
 
     // Insert project into database with default values for approval_status and total_votes
     await conn.query(
-      "INSERT INTO Projects (title, description, supervisor_name, graduation_year, graduation_term, department_name, project_image_path, github_link, leader_email, approval_status, total_votes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', 0)",
-      [title, description, supervisor_name, graduation_year, graduation_term, department_name, project_image_path, github_link, leader_email]
+      "INSERT INTO Projects (title, description, supervisor_name, graduation_year, graduation_term, department_name, project_image_path, github_link, approval_status, total_votes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending', 0)",
+      [title, description, supervisor_name, graduation_year, graduation_term, department_name, project_image_path, github_link]
     );
 
-    // If project insertion successful, image has been saved successfully
     res.status(201).json({ message: "Project created successfully" });
   } catch (err) {
     console.error("Error creating project:", err);
@@ -176,6 +166,27 @@ router.post("/projects", upload.single("projectImage"), async (req, res) => {
         }
       });
     }
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+router.post("/projects/participants", async (req, res) => {
+  const { project_id, group_members } = req.body;
+
+  try {
+    // Insert group members into ProjectParticipants table
+    const participantPromises = group_members.map(async (member) => {
+      await conn.query(
+        "INSERT INTO ProjectParticipants (project_id, student_name, student_id, grade) VALUES (?, ?, ?, ?)",
+        [project_id, member.name, member.id, member.grade]
+      );
+    });
+
+    await Promise.all(participantPromises);
+
+    res.status(201).json({ message: "Participant details created successfully" });
+  } catch (err) {
+    console.error("Error creating participant details:", err);
     res.status(500).json({ error: "Server error" });
   }
 });
