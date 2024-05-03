@@ -9,6 +9,7 @@ const path = require("path");
 
 //---------------------------------------START OF AUTHENTICATION----------------------------------------------------
 
+// STUDENT LOGIN
 router.post(
   "/student-login",
   body("student_id")
@@ -71,7 +72,7 @@ router.post(
   }
 );
 
-
+// STUDENT REGISTRATION
 router.post(
   "/student-register",
   body("email")
@@ -99,29 +100,7 @@ router.post(
         return res.status(400).json({ errors: errors.array() });
       }
 
-      // 2- CHECK FOR DUPLICATE STUDENT ID
-      const checkStudentIdExists = await conn.query(
-        "select * from students where student_id = ?",
-        [req.body.student_id]
-      );
-      if (checkStudentIdExists.length > 0) {
-        return res.status(409).json({
-          error: "Student ID already exists!",
-        });
-      }
-
-      // 3- CHECK FOR DUPLICATE EMAIL
-      const checkEmailExists = await conn.query(
-        "select * from students where student_email = ?",
-        [req.body.email]
-      );
-      if (checkEmailExists.length > 0) {
-        return res.status(409).json({
-          error: "Email already exists!",
-        });
-      }
-
-      // 4- PREPARE STUDENT OBJECT TO -> SAVE
+      // 2- PREPARE STUDENT OBJECT TO -> SAVE
       const studentData = {
         student_id: req.body.student_id,
         student_name: req.body.student_name,
@@ -132,17 +111,24 @@ router.post(
         student_token: crypto.randomBytes(16).toString("hex"),
       };
 
-      // 5- INSERT STUDENT OBJECT INTO DB
-      await conn.query("insert into students set ? ", studentData);
+      // 3- INSERT STUDENT OBJECT INTO DB
+      await conn.query("INSERT INTO students SET ? ", studentData);
       delete studentData.student_password;
       res.status(201).json(studentData);
     } catch (err) {
       console.error("Error registering student:", err);
-      res.status(500).json({ err: "Server error" });
+
+      // Check if the error is due to duplicate entry
+      if (err.sqlMessage && err.sqlMessage.includes("Duplicate entry")) {
+        return res.status(409).json({
+          error: "Duplicate entry for Student ID or Email",
+        });
+      }
+
+      res.status(500).json({ error: "Server error" });
     }
   }
 );
-
 
 //------------------------------------END OF AUTHENTICATION--------------------------------------------------------
 
@@ -209,23 +195,40 @@ router.post("/register-project", upload.single("projectFile"), async (req, res) 
 });
 
 
-router.post("/projects/participants", async (req, res) => {
-  const { project_id, group_members } = req.body;
-
+//Add project student
+router.post("/project-students", async (req, res) => {
   try {
-    // Insert group members into ProjectParticipants table
-    const participantPromises = group_members.map(async (member) => {
-      await conn.query(
-        "INSERT INTO ProjectParticipants (project_id, student_name, student_id, grade) VALUES (?, ?, ?, ?)",
-        [project_id, member.name, member.id, member.grade]
-      );
-    });
+    // 1. Extract project ID and teammate data from request body
+    const { projectId, teammateData } = req.body;
 
-    await Promise.all(participantPromises);
+    // 2. Validate project ID (assuming it's a number)
+    if (!projectId || typeof projectId !== "number") {
+      return res.status(400).json({ error: "Invalid project ID provided" });
+    }
 
-    res.status(201).json({ message: "Participant details created successfully" });
+    // 3. Check if project exists in database
+    const projectExists = await conn.query(
+      "SELECT project_id FROM projects WHERE project_id = ?",
+      [projectId]
+    );
+
+    if (projectExists.length === 0) {
+      return res.status(404).json({ error: "Project not found" });
+    }
+
+    // 4. Insert project-student associations for teammates (with null grades)
+    const teammateInserts = teammateData.map((teammate) =>
+      conn.query(
+        "INSERT INTO project_students (project_id, student_id, student_name, semester_work_grade, final_work_grade, overall_grade) VALUES (?, ?, ?, ?, ?, ?)",
+        [projectId, teammate.studentId, teammate.name, null, null, null]
+      )
+    );
+
+    await Promise.all(teammateInserts); // Wait for all teammate inserts to complete
+
+    res.status(201).json({ message: "Project-student associations created successfully" });
   } catch (err) {
-    console.error("Error creating participant details:", err);
+    console.error("Error creating project-student associations:", err);
     res.status(500).json({ error: "Server error" });
   }
 });
@@ -234,7 +237,7 @@ router.post("/projects/participants", async (req, res) => {
 // Get a list of all projects
 router.get('/projects', (req, res) => {
   // Fetch all projects from database with selected fields
-  conn.query('SELECT project_id, title, description, supervisor_name, graduation_year, graduation_term, department_name, project_image_path, github_link, approval_status, total_votes FROM Projects', (err, results) => {
+  conn.query('SELECT project_id, title, description, supervisor_name, graduation_year, graduation_term, department_name, project_files_path, github_link, approval_status, total_votes FROM Projects', (err, results) => {
     if (err) {
       res.status(500).json({ error: 'Error fetching projects' });
     } else {
@@ -243,11 +246,12 @@ router.get('/projects', (req, res) => {
   });
 });
 
+
 // Get details of a specific project by ID
 router.get('/projects/:id', (req, res) => {
   const projectId = req.params.id;
   // Fetch project from database by ID with selected fields
-  conn.query('SELECT project_id, title, description, supervisor_name, graduation_year, graduation_term, department_name, project_image_path, github_link, IFNULL(approval_status, "pending") AS approval_status, IFNULL(total_votes, 0) AS total_votes FROM Projects WHERE project_id = ?', [projectId], (err, results) => {
+  conn.query('SELECT project_id, title, description, supervisor_name, graduation_year, graduation_term, department_name, project_files_path, github_link, IFNULL(approval_status, "pending") AS approval_status, IFNULL(total_votes, 0) AS total_votes FROM Projects WHERE project_id = ?', [projectId], (err, results) => {
     if (err) {
       res.status(500).json({ error: 'Error fetching project' });
     } else if (results.length === 0) {
@@ -259,17 +263,78 @@ router.get('/projects/:id', (req, res) => {
 });
 
 // Update an existing project by ID
-router.put('/projects/:id', (req, res) => {
-  const projectId = req.params.id;
-  const { title, description, supervisor_name, graduation_year, graduation_term, department_name, project_image_path, github_link } = req.body;
-  // Update project in database by ID
-  conn.query('UPDATE Projects SET title = ?, description = ?, supervisor_name = ?, graduation_year = ?, graduation_term = ?, department_name = ?, project_image_path = ?, github_link = ? WHERE project_id = ?', [title, description, supervisor_name, graduation_year, graduation_term, department_name, project_image_path, github_link, projectId], (err, result) => {
-    if (err) {
-      res.status(500).json({ error: 'Error updating project' });
-    } else {
-      res.status(200).json({ message: 'Project updated successfully' });
+router.put("/update-project/:projectId", upload.single("projectFile"), async (req, res) => {
+  const projectId = req.params.projectId;
+
+  const {
+    title,
+    description,
+    supervisor_name,
+    graduation_year,
+    graduation_term,
+    department_name,
+    github_link,
+  } = req.body;
+
+  try {
+    let project_file_path = null;
+    if (req.file) {
+      project_file_path = req.file.path;
     }
-  });
+
+    // Construct the SQL query for updating the project
+    let query = "UPDATE Projects SET ";
+    const values = [];
+
+    if (title) {
+      query += "title = ?, ";
+      values.push(title);
+    }
+    if (description) {
+      query += "description = ?, ";
+      values.push(description);
+    }
+    if (supervisor_name) {
+      query += "supervisor_name = ?, ";
+      values.push(supervisor_name);
+    }
+    if (graduation_year) {
+      query += "graduation_year = ?, ";
+      values.push(graduation_year);
+    }
+    if (graduation_term) {
+      query += "graduation_term = ?, ";
+      values.push(graduation_term);
+    }
+    if (department_name) {
+      query += "department_name = ?, ";
+      values.push(department_name);
+    }
+    if (github_link) {
+      query += "github_link = ?, ";
+      values.push(github_link);
+    }
+    if (project_file_path) {
+      query += "project_files_path = ?, ";
+      values.push(project_file_path);
+    }
+
+    // Remove the trailing comma and space
+    query = query.slice(0, -2);
+
+    // Add the WHERE clause to specify the project to update
+    query += " WHERE project_id = ?";
+    values.push(projectId);
+
+    // Execute the update query
+    await conn.query(query, values);
+
+    res.status(200).json({ message: "Project updated successfully" });
+  } catch (err) {
+    console.error("Error updating project:", err);
+    // Handle errors
+    res.status(500).json({ error: "Server error" });
+  }
 });
 
 // Delete a project by ID
