@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 03, 2024 at 05:18 PM
+-- Generation Time: May 04, 2024 at 04:02 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -20,6 +20,55 @@ SET time_zone = "+00:00";
 --
 -- Database: `demobackend2`
 --
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `bookmarks`
+--
+
+CREATE TABLE `bookmarks` (
+  `bookmark_id` int(11) NOT NULL,
+  `student_id` int(11) DEFAULT NULL,
+  `project_id` int(11) DEFAULT NULL,
+  `title` varchar(255) DEFAULT NULL,
+  `department_name` varchar(255) DEFAULT NULL,
+  `total_votes` int(11) DEFAULT NULL,
+  `bookmark_timestamp` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `bookmarks`
+--
+
+INSERT INTO `bookmarks` (`bookmark_id`, `student_id`, `project_id`, `title`, `department_name`, `total_votes`, `bookmark_timestamp`) VALUES
+(2, 202000762, 4, 'GPMS', 'is', 0, '2024-05-04 01:34:43'),
+(3, 202000762, 3, 'hamadahamada', 'manal', 0, '2024-05-04 01:39:51'),
+(4, 202000761, 1, 'Ay haga', NULL, 4, '2024-05-04 13:50:07');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `comments`
+--
+
+CREATE TABLE `comments` (
+  `comment_id` int(11) NOT NULL,
+  `project_id` int(11) DEFAULT NULL,
+  `commenter_id` int(11) DEFAULT NULL,
+  `comment_text` text DEFAULT NULL,
+  `timestamp` timestamp NOT NULL DEFAULT current_timestamp(),
+  `commenter_name` varchar(255) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `comments`
+--
+
+INSERT INTO `comments` (`comment_id`, `project_id`, `commenter_id`, `comment_text`, `timestamp`, `commenter_name`) VALUES
+(4, 1, 202000762, 'This is a test comment.', '2024-05-04 01:03:23', 'Mohamed Zain'),
+(5, 1, 202000762, 'This is a test comment.', '2024-05-04 01:04:35', 'Mohamed Zain'),
+(16, 1, 202000761, 'Your comment text here', '2024-05-04 13:45:28', 'Mohamed Zain');
 
 -- --------------------------------------------------------
 
@@ -61,8 +110,8 @@ CREATE TABLE `projects` (
 --
 
 INSERT INTO `projects` (`project_id`, `title`, `description`, `supervisor_name`, `graduation_year`, `graduation_term`, `department_name`, `project_files_path`, `github_link`, `approval_status`, `total_votes`) VALUES
-(1, 'Ay haga', 'zain', 'Mar3y ', NULL, NULL, NULL, NULL, NULL, 'Pending', 0),
-(2, 'Project Title123', 'gthgtughurrreuifhfhhfj', 'Supervisor Name', 2024, 'Spring', 'Computer Science', NULL, 'https://github.com/example/project', 'Pending', 1),
+(1, 'Ay haga', 'zain', 'Mar3y ', NULL, NULL, NULL, NULL, NULL, 'Pending', 4),
+(2, 'Project Title123', 'gthgtughurrreuifhfhhfj', 'Supervisor Name', 2024, 'Spring', 'Computer Science', NULL, 'https://github.com/example/project', 'Pending', 9),
 (3, 'hamadahamada', 'hamadahamada', 'hamadahamada', 2027, 'summer', 'manal', NULL, 'hamada.com/github_link ', 'Pending', 0),
 (4, 'GPMS', 'kter', 'DR MAray', 2024, 'june', 'is', 'project_files\\1714685518174.rar', 'hamada.com/github_link ', 'Pending', 0);
 
@@ -99,7 +148,9 @@ CREATE TABLE `project_students` (
 
 INSERT INTO `project_students` (`project_id`, `student_name`, `student_id`, `semester_work_grade`, `final_work_grade`, `overall_grade`) VALUES
 (3, 'Jane Smith', '16', NULL, NULL, NULL),
-(3, 'Mike Jones', '17', NULL, NULL, NULL);
+(3, 'Mike Jones', '17', NULL, NULL, NULL),
+(3, 'Jane Smith', '654321', NULL, NULL, NULL),
+(3, 'Mike Jones', '987654', NULL, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -129,6 +180,7 @@ INSERT INTO `students` (`student_id`, `student_name`, `student_email`, `student_
 (10, 'admin hello', 'helllllllll@fci.helwan.edu.eg', '$2b$10$2imy8DN1H3vZ9vGdzjjDwepImLKKZ/sxbulWUmXEzQ7cJdm.JzM3q', NULL, NULL, ''),
 (11, 'admin hello', 'youyou@fci.helwan.edu.eg', '$2b$10$k3anRZtkhnlQmDhDSOk7SOX3aAKrItRbYbqbptMcWdeD7ZRGeemA6', NULL, NULL, ''),
 (12, 'admin hello', 'youyouyou@fci.helwan.edu.eg', '$2b$10$IRSq/VqIoN0AiHkicDA/RenywvSzJAXsUH/kQmzwrYruWhSh8RL5y', NULL, NULL, '017b7e73df18c3b285a18bfffb6526ce'),
+(202000245, 'Hazem hamdy', 'hazem@fci.helwan.edu.eg', '$2b$10$RXTt9qNhq7gfEvDDfBtf.e7T5IPyurWo7Y/cjlHO16Tl84oDV7CeG', 'Software Engineering', NULL, 'e48ad5d6632dbf969b97a577490858f7'),
 (202000761, 'Mohamed Zain', 'jon@fci.helwan.edu.eg', '$2b$10$vlsDivDwlWUXlpuoZ121p.3HuvqNDWhdo3DlmNv.VoXhFB/0qKPv6', 'Software Engineering', NULL, '86ac195bf92d16376e870b0f638866f4'),
 (202000762, 'Mohamed Zain', 'john@fci.helwan.edu.eg', '$2b$10$65z7DgiOmWHGz1ycemwniOmnAvIN6z409A6Hl0y2g.u855vpod6mm', 'Software Engineering', NULL, '17314c1288b5441d770c7e2c3ffa396d');
 
@@ -149,11 +201,32 @@ CREATE TABLE `votes` (
 --
 
 INSERT INTO `votes` (`vote_id`, `project_id`, `timestamp`) VALUES
-(1, 2, '2024-04-30 20:13:27');
+(46, 2, '2024-05-03 20:03:25'),
+(47, 2, '2024-05-03 20:03:27'),
+(48, 1, '2024-05-04 09:58:08'),
+(49, 1, '2024-05-04 10:06:02'),
+(50, 1, '2024-05-04 10:09:27'),
+(51, 1, '2024-05-04 10:36:26');
 
 --
 -- Indexes for dumped tables
 --
+
+--
+-- Indexes for table `bookmarks`
+--
+ALTER TABLE `bookmarks`
+  ADD PRIMARY KEY (`bookmark_id`),
+  ADD KEY `student_id` (`student_id`),
+  ADD KEY `project_id` (`project_id`);
+
+--
+-- Indexes for table `comments`
+--
+ALTER TABLE `comments`
+  ADD PRIMARY KEY (`comment_id`),
+  ADD KEY `project_id` (`project_id`),
+  ADD KEY `commenter_id` (`commenter_id`);
 
 --
 -- Indexes for table `professor`
@@ -197,6 +270,18 @@ ALTER TABLE `votes`
 --
 
 --
+-- AUTO_INCREMENT for table `bookmarks`
+--
+ALTER TABLE `bookmarks`
+  MODIFY `bookmark_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+
+--
+-- AUTO_INCREMENT for table `comments`
+--
+ALTER TABLE `comments`
+  MODIFY `comment_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+
+--
 -- AUTO_INCREMENT for table `projects`
 --
 ALTER TABLE `projects`
@@ -206,11 +291,25 @@ ALTER TABLE `projects`
 -- AUTO_INCREMENT for table `votes`
 --
 ALTER TABLE `votes`
-  MODIFY `vote_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `vote_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=52;
 
 --
 -- Constraints for dumped tables
 --
+
+--
+-- Constraints for table `bookmarks`
+--
+ALTER TABLE `bookmarks`
+  ADD CONSTRAINT `bookmarks_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `students` (`student_id`),
+  ADD CONSTRAINT `bookmarks_ibfk_2` FOREIGN KEY (`project_id`) REFERENCES `projects` (`project_id`);
+
+--
+-- Constraints for table `comments`
+--
+ALTER TABLE `comments`
+  ADD CONSTRAINT `comments_ibfk_1` FOREIGN KEY (`project_id`) REFERENCES `projects` (`project_id`),
+  ADD CONSTRAINT `comments_ibfk_2` FOREIGN KEY (`commenter_id`) REFERENCES `students` (`student_id`);
 
 --
 -- Constraints for table `project_professor`
