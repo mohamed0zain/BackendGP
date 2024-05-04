@@ -21,3 +21,5 @@ app.listen(4000, "localhost", () => {
 // ====================  API ROUTES [ ENDPOINTS ]  ====================
 app.use("/auth", auth);
 app.use(logoutRouter);
+const vote = require("./routes/vote");
+app.use("/vote", vote);
