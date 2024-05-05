@@ -175,42 +175,133 @@ router.post("/register-project", upload.single("projectFile"), async (req, res) 
     graduation_term,
     department_name,
     github_link,
+    teammateData, // Ensure this is part of your request body
   } = req.body;
 
-  try {
-    const project_file_path = req.file ? req.file.path : null; // Get the path to the uploaded file
+  // Check if file is uploaded correctly
+  const project_file_path = req.file ? req.file.path : null;
 
-    // Insert project into database with default values
-    await conn.query(
-      "INSERT INTO Projects (title, description, supervisor_name, graduation_year, graduation_term, department_name, project_files_path, github_link, approval_status, total_votes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending', 0)",
-      [
-        title,
-        description,
-        supervisor_name,
-        graduation_year,
-        graduation_term,
-        department_name,
-        project_file_path,
-        github_link,
-      ]
+  try {
+    // Check if any of the student IDs already exist in project_students table
+    const studentIds = teammateData.map(teammate => teammate.studentId);
+    const existingStudents = await checkExistingStudents(studentIds);
+    if (existingStudents.length > 0) {
+      return res.status(400).json({ error: "One or more students are already associated with a project" });
+    }
+
+    // Start a transaction
+    await startTransaction();
+
+    // Insert the project into the projects table
+    const projectInsertion = await insertProject(
+      title,
+      description,
+      supervisor_name,
+      graduation_year,
+      graduation_term,
+      department_name,
+      project_file_path,
+      github_link
     );
 
-    res.status(201).json({ message: "Project created successfully" });
+    const projectId = projectInsertion.insertId;
+
+    // For each teammate, insert a record into the project_students table
+    if (teammateData && teammateData.length) {
+      for (const teammate of teammateData) {
+        await insertProjectStudent(projectId, teammate.name, teammate.studentId);
+      }
+    }
+
+    // If everything was successful, commit the transaction
+    await commitTransaction();
+
+    // Send success response
+    res.status(201).json({ message: "Project and student associations created successfully" });
+
   } catch (err) {
-    console.error("Error creating project:", err);
-    // If project insertion failed, delete the uploaded file if it exists
-    if (req.file) {
-      fs.unlink(req.file.path, (unlinkErr) => {
+    console.error("Error in project creation or student association:", err);
+
+    // Attempt to rollback the transaction on error
+    await rollbackTransaction();
+
+    // Delete uploaded file if it exists and an error occurred
+    if (project_file_path) {
+      fs.unlink(project_file_path, (unlinkErr) => {
         if (unlinkErr) {
           console.error("Error deleting uploaded file:", unlinkErr);
         }
       });
     }
-    res.status(500).json({ error: "Server error" });
+
+    // Send an error response to the client
+    res.status(500).json({ error: "Server error during project creation. Transaction has been rolled back." });
   }
 });
 
+// Function to check if any of the provided student IDs already exist in project_students table
+function checkExistingStudents(studentIds) {
+  return new Promise((resolve, reject) => {
+    const sql = "SELECT student_id FROM project_students WHERE student_id IN (?)";
+    conn.query(sql, [studentIds], (err, results) => {
+      if (err) reject(err);
+      else resolve(results);
+    });
+  });
+}
 
+
+// Function to start a transaction
+function startTransaction() {
+  return new Promise((resolve, reject) => {
+    conn.beginTransaction((err) => {
+      if (err) reject(err);
+      else resolve();
+    });
+  });
+}
+
+// Function to commit a transaction
+function commitTransaction() {
+  return new Promise((resolve, reject) => {
+    conn.commit((err) => {
+      if (err) reject(err);
+      else resolve();
+    });
+  });
+}
+
+// Function to rollback a transaction
+function rollbackTransaction() {
+  return new Promise((resolve, reject) => {
+    conn.rollback((err) => {
+      if (err) reject(err);
+      else resolve();
+    });
+  });
+}
+
+// Function to insert a project into the projects table
+function insertProject(title, description, supervisor_name, graduation_year, graduation_term, department_name, project_files_path, github_link) {
+  return new Promise((resolve, reject) => {
+    const sql = "INSERT INTO projects (title, description, supervisor_name, graduation_year, graduation_term, department_name, project_files_path, github_link, approval_status, total_votes) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending', 0)";
+    conn.query(sql, [title, description, supervisor_name, graduation_year, graduation_term, department_name, project_files_path, github_link], (err, result) => {
+      if (err) reject(err);
+      else resolve(result);
+    });
+  });
+}
+
+// Function to insert a project student into the project_students table
+function insertProjectStudent(projectId, studentName, studentId) {
+  return new Promise((resolve, reject) => {
+    const sql = "INSERT INTO project_students (project_id, student_name, student_id) VALUES (?, ?, ?)";
+    conn.query(sql, [projectId, studentName, studentId], (err) => {
+      if (err) reject(err);
+      else resolve();
+    });
+  });
+}
 // Get a list of all projects
 router.get('/projects', (req, res) => {
   // Fetch all projects from database with selected fields
