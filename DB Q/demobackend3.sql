@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 05, 2024 at 06:30 PM
+-- Generation Time: May 06, 2024 at 12:00 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -18,8 +18,22 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `demobackend2`
+-- Database: `demobackend3`
 --
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `admin`
+--
+
+CREATE TABLE `admin` (
+  `admin_id` int(11) NOT NULL,
+  `admin_name` varchar(255) NOT NULL,
+  `admin_email` varchar(255) NOT NULL,
+  `admin_password` varchar(255) NOT NULL,
+  `admin_token` varchar(255) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -84,6 +98,15 @@ CREATE TABLE `professor` (
   `professor_department` varchar(255) NOT NULL,
   `professor_token` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `professor`
+--
+
+INSERT INTO `professor` (`professor_id`, `professor_name`, `professor_email`, `professor_password`, `professor_department`, `professor_token`) VALUES
+(0, 'Mohamed zain', 'john.doe@example.com', 'password123', 'Computer Science', 'cef018f680c2ee0ab85fb35d0432cc78'),
+(0, 'Mohamed zain', 'john.doe@example.com', 'password123', 'Computer Science', '8c45db7b241f3e203cbe53ece65ce4a4'),
+(0, 'Mohamed zain', 'john.doe@example.com', '$2b$10$EJvXMDkwhUOhgGtKyOPxEOl7YfSQ9ZpnK/nI27V0e7O2f9mWgY9DW', 'Computer Science', '2a4fb57558698052be59960f474cf6c4');
 
 -- --------------------------------------------------------
 
@@ -215,6 +238,13 @@ INSERT INTO `votes` (`vote_id`, `project_id`, `student_id`, `timestamp`) VALUES
 --
 
 --
+-- Indexes for table `admin`
+--
+ALTER TABLE `admin`
+  ADD PRIMARY KEY (`admin_id`),
+  ADD UNIQUE KEY `admin_email` (`admin_email`);
+
+--
 -- Indexes for table `bookmarks`
 --
 ALTER TABLE `bookmarks`
@@ -270,6 +300,12 @@ ALTER TABLE `votes`
 --
 -- AUTO_INCREMENT for dumped tables
 --
+
+--
+-- AUTO_INCREMENT for table `admin`
+--
+ALTER TABLE `admin`
+  MODIFY `admin_id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `bookmarks`
