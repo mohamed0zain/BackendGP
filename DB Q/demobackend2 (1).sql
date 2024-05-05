@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 04, 2024 at 04:02 PM
+-- Generation Time: May 05, 2024 at 06:30 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -110,10 +110,11 @@ CREATE TABLE `projects` (
 --
 
 INSERT INTO `projects` (`project_id`, `title`, `description`, `supervisor_name`, `graduation_year`, `graduation_term`, `department_name`, `project_files_path`, `github_link`, `approval_status`, `total_votes`) VALUES
-(1, 'Ay haga', 'zain', 'Mar3y ', NULL, NULL, NULL, NULL, NULL, 'Pending', 4),
-(2, 'Project Title123', 'gthgtughurrreuifhfhhfj', 'Supervisor Name', 2024, 'Spring', 'Computer Science', NULL, 'https://github.com/example/project', 'Pending', 9),
+(1, 'Ay haga', 'zain', 'Mar3y ', NULL, NULL, NULL, NULL, NULL, 'Pending', 8),
+(2, 'Project Title123', 'gthgtughurrreuifhfhhfj', 'Supervisor Name', 2024, 'Spring', 'Computer Science', NULL, 'https://github.com/example/project', 'Pending', 0),
 (3, 'hamadahamada', 'hamadahamada', 'hamadahamada', 2027, 'summer', 'manal', NULL, 'hamada.com/github_link ', 'Pending', 0),
-(4, 'GPMS', 'kter', 'DR MAray', 2024, 'june', 'is', 'project_files\\1714685518174.rar', 'hamada.com/github_link ', 'Pending', 0);
+(4, 'GPMS', 'kter', 'DR MAray', 2024, 'june', 'is', 'project_files\\1714685518174.rar', 'hamada.com/github_link ', 'Pending', 0),
+(5, 'ay klam faaaddy', 'hedddd', 'manaaaaal', 2025, 'summerr', 'iscs', NULL, 'ta3ban', 'Pending', 0);
 
 -- --------------------------------------------------------
 
@@ -150,7 +151,10 @@ INSERT INTO `project_students` (`project_id`, `student_name`, `student_id`, `sem
 (3, 'Jane Smith', '16', NULL, NULL, NULL),
 (3, 'Mike Jones', '17', NULL, NULL, NULL),
 (3, 'Jane Smith', '654321', NULL, NULL, NULL),
-(3, 'Mike Jones', '987654', NULL, NULL, NULL);
+(3, 'Mike Jones', '987654', NULL, NULL, NULL),
+(5, 'hhhhn', '202000777', NULL, NULL, NULL),
+(5, 'Hazeyyy', '202000222', NULL, NULL, NULL),
+(5, 'Abdelrahman', '202000232', NULL, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -193,6 +197,7 @@ INSERT INTO `students` (`student_id`, `student_name`, `student_email`, `student_
 CREATE TABLE `votes` (
   `vote_id` int(11) NOT NULL,
   `project_id` int(11) DEFAULT NULL,
+  `student_id` int(11) DEFAULT NULL,
   `timestamp` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -200,13 +205,10 @@ CREATE TABLE `votes` (
 -- Dumping data for table `votes`
 --
 
-INSERT INTO `votes` (`vote_id`, `project_id`, `timestamp`) VALUES
-(46, 2, '2024-05-03 20:03:25'),
-(47, 2, '2024-05-03 20:03:27'),
-(48, 1, '2024-05-04 09:58:08'),
-(49, 1, '2024-05-04 10:06:02'),
-(50, 1, '2024-05-04 10:09:27'),
-(51, 1, '2024-05-04 10:36:26');
+INSERT INTO `votes` (`vote_id`, `project_id`, `student_id`, `timestamp`) VALUES
+(5, 1, 202000245, '2024-05-05 12:53:44'),
+(8, 1, 12, '2024-05-05 12:53:58'),
+(9, 1, 11, '2024-05-05 12:54:02');
 
 --
 -- Indexes for dumped tables
@@ -285,13 +287,13 @@ ALTER TABLE `comments`
 -- AUTO_INCREMENT for table `projects`
 --
 ALTER TABLE `projects`
-  MODIFY `project_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `project_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `votes`
 --
 ALTER TABLE `votes`
-  MODIFY `vote_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=52;
+  MODIFY `vote_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- Constraints for dumped tables
