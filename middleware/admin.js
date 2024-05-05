@@ -13,5 +13,4 @@ const admin = async (req, res, next) => {
     });
   }
 };
-
 module.exports = admin;
