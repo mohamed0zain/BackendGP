@@ -20,6 +20,8 @@ const professor = require("./routes/professor");
 const student = require("./routes/student");
 const comment = require("./routes/comment");
 const bookmark = require("./routes/bookmark");
+const admin = require("./routes/admin");
+
 
 // ====================  RUN THE APP  ====================
 
@@ -35,3 +37,5 @@ app.use("/professor", professor);
 app.use("/student", student);
 app.use("/bookmark", bookmark);
 app.use("/comment", comment);
+app.use("/admin", admin);
+

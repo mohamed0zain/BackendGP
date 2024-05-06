@@ -21,8 +21,8 @@ router.get('/pending-projects', (req, res) => {
 
 // Get a list of accepted projects
 
-router.get('/accepted-projects', (req, res) => {
-  conn.query('SELECT * FROM Projects WHERE approval_status = "accepted"', (err, results) => {
+router.get('/approved-projects', (req, res) => {
+  conn.query('SELECT * FROM projects WHERE approval_status = "Approved"', (err, results) => {
     if (err) {
       res.status(500).json({ error: 'Error fetching accepted projects' });
     } else {
@@ -34,7 +34,7 @@ router.get('/accepted-projects', (req, res) => {
 // Get a list of rejected projects
 
 router.get('/rejected-projects', (req, res) => {
-  conn.query('SELECT * FROM Projects WHERE approval_status = "rejected"', (err, results) => {
+  conn.query('SELECT * FROM Projects WHERE approval_status = "Rejected"', (err, results) => {
     if (err) {
       res.status(500).json({ error: 'Error fetching rejected projects' });
     } else {
@@ -58,34 +58,60 @@ function insertProfessor(name, email, password, department, token) {
   });
 }
 
-// Create a new professor
-router.post("/create-professor", async (req, res) => {
-  const { name, email, password, department } = req.body;
+// Register professor
 
-  try {
-    const token = crypto.randomBytes(16).toString("hex");
+router.post(
+  "/professor-register",
+  body("professor_email")
+    .isEmail()
+    .withMessage("Please enter a valid email")
+    .custom((value) => {
+      if (!value.endsWith("@fci.helwan.edu.eg")) {
+        throw new Error("Email domain must be '@fci.helwan.edu.eg'");
+      }
+      return true;
+    }),
+  body("password")
+    .isLength({ min: 8, max: 12 })
+    .withMessage("Password should be between 8 to 12 characters"),
+  body("professor_department")
+    .isString()
+    .withMessage("Please enter a valid department"),
+  body("professor_id")
+    .isInt()
+    .withMessage("Please enter a valid professor ID (integer)"),
+  async (req, res) => {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+      }
 
-    const hashedPassword = await hashPassword(password);
+      const professorData = {
+        professor_id: req.body.professor_id,
+        professor_name: req.body.professor_name,
+        professor_email: req.body.professor_email,
+        professor_password: await bcrypt.hash(req.body.password, 10),
+        professor_department: req.body.professor_department,
+        professor_token: crypto.randomBytes(16).toString("hex"),
+      };
 
-    await insertProfessor(name, email, hashedPassword, department, token);
+      await conn.query("INSERT INTO professor SET ?", professorData);
+      delete professorData.professor_password;
+      res.status(201).json(professorData);
+    } catch (err) {
+      console.error("Error registering professor:", err);
 
-    res.status(201).json({ message: "Professor created successfully", token });
-  } catch (error) {
-    console.error("Error creating professor:", error);
-    res.status(500).json({ error: "Server error while creating professor" });
+      if (err.sqlMessage && err.sqlMessage.includes("Duplicate entry")) {
+        return res.status(409).json({
+          error: "Duplicate entry for Professor ID or Email",
+        });
+      }
+
+      res.status(500).json({ error: "Server error" });
+    }
   }
-});
-
-// Function to hash a password
-
-async function hashPassword(password) {
-  try {
-    const hashedPassword = await bcrypt.hash(password, saltRounds);
-    return hashedPassword;
-  } catch (error) {
-    throw error;
-  }
-}
+);
 
 // Delete a comment by comment_id
 

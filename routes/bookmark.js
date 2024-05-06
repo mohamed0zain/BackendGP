@@ -8,26 +8,55 @@ const conn = require("../db/dbConnection");
 
 // add a bookmark for a project
 router.post("/add-bookmark/:project_id/:student_id", async (req, res) => {
-  const { student_id } = req.params; 
-  const { project_id } = req.params;
+  const { student_id, project_id } = req.params;
 
   try {
-      const projectDetails = await getProjectDetails(project_id);
+      const bookmarkExists = await checkBookmarkExists(student_id, project_id);
 
-      if (!projectDetails) {
-          return res.status(404).json({ error: "Project not found" });
+      if (bookmarkExists) {
+          await removeBookmark(student_id, project_id);
+          return res.status(200).json({ message: "Bookmark removed successfully" });
+      } else {
+          const projectDetails = await getProjectDetails(project_id);
+
+          if (!projectDetails) {
+              return res.status(404).json({ error: "Project not found" });
+          }
+
+          const { title, department_name, total_votes } = projectDetails;
+
+          await insertBookmark(student_id, project_id, title, department_name, total_votes);
+
+          return res.status(201).json({ message: "Bookmark added successfully" });
       }
-
-      const { title, department_name, total_votes } = projectDetails;
-
-      await insertBookmark(student_id, project_id, title, department_name, total_votes);
-
-      res.status(201).json({ message: "Bookmark added successfully" });
   } catch (error) {
-      console.error("Error adding bookmark:", error);
-      res.status(500).json({ error: "Failed to add bookmark" });
+      console.error("Error adding/removing bookmark:", error);
+      res.status(500).json({ error: "Failed to add/remove bookmark" });
   }
 });
+
+// Function to check if a bookmark exists for the given student and project
+function checkBookmarkExists(student_id, project_id) {
+  return new Promise((resolve, reject) => {
+      const sql = "SELECT COUNT(*) AS count FROM Bookmarks WHERE student_id = ? AND project_id = ?";
+      conn.query(sql, [student_id, project_id], (err, result) => {
+          if (err) reject(err);
+          else resolve(result[0].count > 0);
+      });
+  });
+}
+
+// Function to remove a bookmark from the Bookmarks table
+function removeBookmark(student_id, project_id) {
+  return new Promise((resolve, reject) => {
+      const sql = "DELETE FROM Bookmarks WHERE student_id = ? AND project_id = ?";
+      conn.query(sql, [student_id, project_id], (err, result) => {
+          if (err) reject(err);
+          else resolve();
+      });
+  });
+}
+
 
 
 // Function to get project details
@@ -82,29 +111,5 @@ router.get("/show-bookmarks/:student_id", async (req, res) => {
 });
 
 
-// Delete a bookmark by a bookmark_id
-
-router.delete("/delete-bookmarks/:bookmark_id", async (req, res) => {
-  const bookmarkId = req.params.bookmark_id;
-
-  try {
-    const sql = "DELETE FROM bookmarks WHERE bookmark_id = ?";
-    conn.query(sql, [bookmarkId], (err, result) => {
-      if (err) {
-        console.error("Error deleting bookmark:", err);
-        res.status(500).json({ error: "Server error" });
-      } else {
-        if (result.affectedRows > 0) {
-          res.status(200).json({ message: "Bookmark deleted successfully" });
-        } else {
-          res.status(404).json({ error: "Bookmark not found" });
-        }
-      }
-    });
-  } catch (err) {
-    console.error("Error deleting bookmark:", err);
-    res.status(500).json({ error: "Server error" });
-  }
-});
 
 module.exports = router;

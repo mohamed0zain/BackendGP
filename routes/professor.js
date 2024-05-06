@@ -4,6 +4,58 @@ const { body, validationResult } = require("express-validator");
 const bcrypt = require("bcrypt");
 const util = require("util");
 const conn = require("../db/dbConnection");
+const crypto = require("crypto");
+
+
+// Login professor
+
+router.post(
+    "/professor-login",
+    body("professor_email")
+      .isEmail()
+      .withMessage("Please enter a valid email"),
+    body("password")
+      .isLength({ min: 8, max: 12 })
+      .withMessage("Password should be between 8 to 12 characters"),
+    async (req, res) => {
+      try {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+          return res.status(400).json({ errors: errors.array() });
+        }
+  
+        const query = util.promisify(conn.query).bind(conn);
+        const professor = await query(
+          "SELECT * FROM professor WHERE professor_email = ?",
+          [req.body.professor_email]
+        );
+        if (professor.length === 0) {
+          return res.status(404).json({
+            errors: [{ msg: "Professor email or password not found!" }],
+          });
+        }
+  
+        const checkPassword = await bcrypt.compare(
+          req.body.password,
+          professor[0].professor_password
+        );
+        if (checkPassword) {
+          delete professor[0].professor_password;
+          const newToken = crypto.randomBytes(16).toString("hex");
+          professor[0].professor_token = newToken;
+  
+          res.status(200).json(professor[0]);
+        } else {
+          res.status(404).json({
+            errors: [{ msg: "Professor email or password not found!" }],
+          });
+        }
+      } catch (err) {
+        console.error("Error logging in professor:", err);
+        res.status(500).json({ err: "Server error" });
+      }
+    }
+  );
 
 // GET Professor Profile
 
