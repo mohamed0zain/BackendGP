@@ -2,9 +2,10 @@ const express = require("express");
 const router = express.Router();
 const util = require("util");
 const conn = require("../db/dbConnection");
+const isStudent = require("../middleware/isStudent");
 
 // Get grades of a student
-router.get("/:student_id/grades", async (req, res) => {
+router.get("/:student_id/grades", isStudent ,async (req, res) => {
     try {
         const studentId = req.params.student_id;
 
