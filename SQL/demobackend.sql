@@ -2,8 +2,8 @@
 -- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
--- Host: localhost
--- Generation Time: May 06, 2024 at 06:09 AM
+-- Host: 127.0.0.1
+-- Generation Time: May 06, 2024 at 04:05 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -18,7 +18,7 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `demobackend2`
+-- Database: `demobackend`
 --
 
 -- --------------------------------------------------------
@@ -134,7 +134,7 @@ CREATE TABLE `projects` (
 --
 
 INSERT INTO `projects` (`project_id`, `title`, `description`, `supervisor_name`, `graduation_year`, `graduation_term`, `department_name`, `project_files_path`, `github_link`, `approval_status`, `total_votes`, `professor_id`, `registration_date`) VALUES
-(1, 'ay klam', 'hello', 'mar3333eeeeeeeeeeee', 2024, 'summer', 'is', NULL, 'ay 7aga', 'Pending', 5, NULL, NULL),
+(1, 'ay klam', 'hello', 'mar3333eeeeeeeeeeee', 2024, 'summer', 'is', NULL, 'ay 7aga', 'Pending', 6, NULL, NULL),
 (2, 'Project Title123', 'gthgtughurrreuifhfhhfj', 'Supervisor Name', 2024, 'Spring', 'Computer Science', NULL, 'https://github.com/example/project', 'Pending', 1, NULL, NULL),
 (3, 'hamadahamada', 'hamadahamada', 'hamadahamada', 2027, 'summer', 'manal', NULL, 'hamada.com/github_link ', 'Pending', 0, NULL, NULL),
 (4, 'GPMS', 'kter', 'DR MAray', 2024, 'june', 'is', 'project_files\\1714685518174.rar', 'hamada.com/github_link ', 'Pending', 0, NULL, NULL),
@@ -272,6 +272,7 @@ INSERT INTO `students` (`student_id`, `student_name`, `student_email`, `student_
 CREATE TABLE `votes` (
   `vote_id` int(11) NOT NULL,
   `project_id` int(11) DEFAULT NULL,
+  `student_id` int(11) DEFAULT NULL,
   `timestamp` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -279,14 +280,8 @@ CREATE TABLE `votes` (
 -- Dumping data for table `votes`
 --
 
-INSERT INTO `votes` (`vote_id`, `project_id`, `timestamp`) VALUES
-(1, 2, '2024-04-30 20:13:27'),
-(2, 1, '2024-05-03 19:42:32'),
-(3, 1, '2024-05-03 19:42:59'),
-(4, 6, '2024-05-03 19:43:41'),
-(5, 1, '2024-05-03 19:47:28'),
-(6, 1, '2024-05-03 19:52:24'),
-(7, 1, '2024-05-03 19:53:45');
+INSERT INTO `votes` (`vote_id`, `project_id`, `student_id`, `timestamp`) VALUES
+(1, 1, 202000762, '2024-05-06 11:05:20');
 
 --
 -- Indexes for dumped tables
@@ -384,7 +379,7 @@ ALTER TABLE `projects`
 -- AUTO_INCREMENT for table `votes`
 --
 ALTER TABLE `votes`
-  MODIFY `vote_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `vote_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- Constraints for dumped tables
