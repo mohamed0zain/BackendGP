@@ -2,8 +2,8 @@
 -- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
--- Host: 127.0.0.1
--- Generation Time: May 06, 2024 at 04:05 PM
+-- Host: localhost
+-- Generation Time: May 07, 2024 at 01:30 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -18,7 +18,7 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `demobackend`
+-- Database: `demobackend2`
 --
 
 -- --------------------------------------------------------
@@ -134,7 +134,7 @@ CREATE TABLE `projects` (
 --
 
 INSERT INTO `projects` (`project_id`, `title`, `description`, `supervisor_name`, `graduation_year`, `graduation_term`, `department_name`, `project_files_path`, `github_link`, `approval_status`, `total_votes`, `professor_id`, `registration_date`) VALUES
-(1, 'ay klam', 'hello', 'mar3333eeeeeeeeeeee', 2024, 'summer', 'is', NULL, 'ay 7aga', 'Pending', 6, NULL, NULL),
+(1, 'ay klam', 'hello', 'mar3333eeeeeeeeeeee', 2024, 'summer', 'is', NULL, 'ay 7aga', 'Pending', 5, NULL, NULL),
 (2, 'Project Title123', 'gthgtughurrreuifhfhhfj', 'Supervisor Name', 2024, 'Spring', 'Computer Science', NULL, 'https://github.com/example/project', 'Pending', 1, NULL, NULL),
 (3, 'hamadahamada', 'hamadahamada', 'hamadahamada', 2027, 'summer', 'manal', NULL, 'hamada.com/github_link ', 'Pending', 0, NULL, NULL),
 (4, 'GPMS', 'kter', 'DR MAray', 2024, 'june', 'is', 'project_files\\1714685518174.rar', 'hamada.com/github_link ', 'Pending', 0, NULL, NULL),
@@ -142,7 +142,7 @@ INSERT INTO `projects` (`project_id`, `title`, `description`, `supervisor_name`,
 (28, 'ay klam', 'hello', 'mar3333eeeeeeeeeeee', 2024, 'summer', 'is', NULL, 'ay 7aga', 'Pending', 0, NULL, NULL),
 (29, 'ay klam faaaddy', 'hedddd', 'manaaaaal', 2025, 'summerr', 'iscs', NULL, 'ta3ban', 'Pending', 0, NULL, NULL),
 (30, 'ay klam faaaddy', 'hedddd', 'manaaaaal', 2025, 'summerr', 'iscs', NULL, 'ta3ban', 'Approved', 0, NULL, NULL),
-(31, 'ay klam faaaddy', 'hedddd', 'manaaaaal', 2025, 'summerr', 'iscs', NULL, 'ta3ban', 'Approved', 0, NULL, '2024-05-05'),
+(31, 'ay klam faaaddy', 'hedddd', 'manaaaaal', 2025, 'summerr', 'iscs', NULL, 'ta3ban', 'Approved', 0, NULL, '2024-05-06'),
 (32, 'ay klam faaaddy', 'hedddd', 'manaaaaal', 2025, 'summerr', 'iscs', NULL, 'ta3ban', 'Pending', 0, NULL, NULL),
 (33, 'ay klam faaaddy', 'hedddd', 'manaaaaal', 2025, 'summerr', 'iscs', NULL, 'ta3ban', 'Pending', 0, 809000586, NULL);
 
@@ -244,7 +244,6 @@ CREATE TABLE `students` (
   `student_email` varchar(255) NOT NULL,
   `student_password` varchar(255) NOT NULL,
   `student_department` varchar(255) DEFAULT NULL,
-  `student_project_id` int(11) DEFAULT NULL,
   `student_token` varchar(255) NOT NULL DEFAULT 'hello'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -252,16 +251,16 @@ CREATE TABLE `students` (
 -- Dumping data for table `students`
 --
 
-INSERT INTO `students` (`student_id`, `student_name`, `student_email`, `student_password`, `student_department`, `student_project_id`, `student_token`) VALUES
-(0, 'Mohamed zain', 'john.doe@fci.helwan.edu.eg', '$2b$10$wkVr6uuRfdajrSQ07t/OAuOBwn8exc0847FDEWKq4Y0iX/bQhf58S', '', NULL, 'd5fde16db6375adc6687a3beb23588e6'),
-(7, 'Mohamed Zain', 'Mohamed_Zain@fci.helwan.edu.eg', '$2b$10$HboC7yQbxbNbfNAGhnrif.n0H/0Br6xw1bORhSzRUYqPlSk.vQYwG', NULL, NULL, '64fa3d60ebb4be5d98e65ac11b129971'),
-(8, 'Mohamed Ahmed', 'Mohamed_Ahmed@fci.helwan.edu.eg', '$2b$10$h3qVOArAI..W4ZdIDvH6/uyBXKMGPq9khAOrio.TrTye5UH1M48i6', NULL, NULL, '6ef85404ec5c8b999f5f703584379e37'),
-(9, 'admin admin', 'admin@fci.helwan.edu.eg', '$2b$10$Rrz45r/CQ1JT3P9H12MYMOYcNMZJb2UDp3g7mxELtvWvtJpxntdBy', NULL, NULL, ''),
-(10, 'admin hello', 'helllllllll@fci.helwan.edu.eg', '$2b$10$2imy8DN1H3vZ9vGdzjjDwepImLKKZ/sxbulWUmXEzQ7cJdm.JzM3q', NULL, NULL, ''),
-(11, 'admin hello', 'youyou@fci.helwan.edu.eg', '$2b$10$k3anRZtkhnlQmDhDSOk7SOX3aAKrItRbYbqbptMcWdeD7ZRGeemA6', NULL, NULL, ''),
-(12, 'admin hello', 'youyouyou@fci.helwan.edu.eg', '$2b$10$IRSq/VqIoN0AiHkicDA/RenywvSzJAXsUH/kQmzwrYruWhSh8RL5y', NULL, NULL, '017b7e73df18c3b285a18bfffb6526ce'),
-(202000761, 'Mohamed Zain', 'jon@fci.helwan.edu.eg', '$2b$10$vlsDivDwlWUXlpuoZ121p.3HuvqNDWhdo3DlmNv.VoXhFB/0qKPv6', 'Software Engineering', NULL, '86ac195bf92d16376e870b0f638866f4'),
-(202000762, 'Mohamed Zain', 'john@fci.helwan.edu.eg', '$2b$10$65z7DgiOmWHGz1ycemwniOmnAvIN6z409A6Hl0y2g.u855vpod6mm', 'Software Engineering', NULL, '17314c1288b5441d770c7e2c3ffa396d');
+INSERT INTO `students` (`student_id`, `student_name`, `student_email`, `student_password`, `student_department`, `student_token`) VALUES
+(0, 'Mohamed zain', 'john.doe@fci.helwan.edu.eg', '$2b$10$wkVr6uuRfdajrSQ07t/OAuOBwn8exc0847FDEWKq4Y0iX/bQhf58S', '', 'd5fde16db6375adc6687a3beb23588e6'),
+(7, 'Mohamed Zain', 'Mohamed_Zain@fci.helwan.edu.eg', '$2b$10$HboC7yQbxbNbfNAGhnrif.n0H/0Br6xw1bORhSzRUYqPlSk.vQYwG', NULL, '64fa3d60ebb4be5d98e65ac11b129971'),
+(8, 'Mohamed Ahmed', 'Mohamed_Ahmed@fci.helwan.edu.eg', '$2b$10$h3qVOArAI..W4ZdIDvH6/uyBXKMGPq9khAOrio.TrTye5UH1M48i6', NULL, '6ef85404ec5c8b999f5f703584379e37'),
+(9, 'admin admin', 'admin@fci.helwan.edu.eg', '$2b$10$Rrz45r/CQ1JT3P9H12MYMOYcNMZJb2UDp3g7mxELtvWvtJpxntdBy', NULL, ''),
+(10, 'admin hello', 'helllllllll@fci.helwan.edu.eg', '$2b$10$2imy8DN1H3vZ9vGdzjjDwepImLKKZ/sxbulWUmXEzQ7cJdm.JzM3q', NULL, ''),
+(11, 'admin hello', 'youyou@fci.helwan.edu.eg', '$2b$10$k3anRZtkhnlQmDhDSOk7SOX3aAKrItRbYbqbptMcWdeD7ZRGeemA6', NULL, ''),
+(12, 'admin hello', 'youyouyou@fci.helwan.edu.eg', '$2b$10$IRSq/VqIoN0AiHkicDA/RenywvSzJAXsUH/kQmzwrYruWhSh8RL5y', NULL, '017b7e73df18c3b285a18bfffb6526ce'),
+(202000761, 'Mohamed Zain', 'jon@fci.helwan.edu.eg', '$2b$10$vlsDivDwlWUXlpuoZ121p.3HuvqNDWhdo3DlmNv.VoXhFB/0qKPv6', 'Software Engineering', '86ac195bf92d16376e870b0f638866f4'),
+(202000762, 'Mohamed Zain', 'john@fci.helwan.edu.eg', '$2b$10$65z7DgiOmWHGz1ycemwniOmnAvIN6z409A6Hl0y2g.u855vpod6mm', 'Software Engineering', '17314c1288b5441d770c7e2c3ffa396d');
 
 -- --------------------------------------------------------
 
@@ -272,7 +271,6 @@ INSERT INTO `students` (`student_id`, `student_name`, `student_email`, `student_
 CREATE TABLE `votes` (
   `vote_id` int(11) NOT NULL,
   `project_id` int(11) DEFAULT NULL,
-  `student_id` int(11) DEFAULT NULL,
   `timestamp` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -280,8 +278,14 @@ CREATE TABLE `votes` (
 -- Dumping data for table `votes`
 --
 
-INSERT INTO `votes` (`vote_id`, `project_id`, `student_id`, `timestamp`) VALUES
-(1, 1, 202000762, '2024-05-06 11:05:20');
+INSERT INTO `votes` (`vote_id`, `project_id`, `timestamp`) VALUES
+(1, 2, '2024-04-30 20:13:27'),
+(2, 1, '2024-05-03 19:42:32'),
+(3, 1, '2024-05-03 19:42:59'),
+(4, 6, '2024-05-03 19:43:41'),
+(5, 1, '2024-05-03 19:47:28'),
+(6, 1, '2024-05-03 19:52:24'),
+(7, 1, '2024-05-03 19:53:45');
 
 --
 -- Indexes for dumped tables
@@ -379,7 +383,7 @@ ALTER TABLE `projects`
 -- AUTO_INCREMENT for table `votes`
 --
 ALTER TABLE `votes`
-  MODIFY `vote_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `vote_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- Constraints for dumped tables

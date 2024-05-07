@@ -5,6 +5,7 @@ const bcrypt = require("bcrypt");
 const util = require("util");
 const conn = require("../db/dbConnection");
 const crypto = require("crypto");
+const isProfessor = require("../middleware/isProfessor");
 
 
 // Login professor
@@ -23,7 +24,7 @@ router.post(
         if (!errors.isEmpty()) {
           return res.status(400).json({ errors: errors.array() });
         }
-  
+
         const query = util.promisify(conn.query).bind(conn);
         const professor = await query(
           "SELECT * FROM professor WHERE professor_email = ?",
@@ -34,7 +35,7 @@ router.post(
             errors: [{ msg: "Professor email or password not found!" }],
           });
         }
-  
+
         const checkPassword = await bcrypt.compare(
           req.body.password,
           professor[0].professor_password
@@ -43,7 +44,7 @@ router.post(
           delete professor[0].professor_password;
           const newToken = crypto.randomBytes(16).toString("hex");
           professor[0].professor_token = newToken;
-  
+
           res.status(200).json(professor[0]);
         } else {
           res.status(404).json({
@@ -187,7 +188,7 @@ router.get("/:professor_id/requested-projects", async (req, res) => {
 
 // Update Project Status API
 
-router.put("/update/project-status", async (req, res) => {
+router.put("/update/project-status", isProfessor ,async (req, res) => {
     try {
         const { project_id, status, professor_id } = req.body;
         if (!project_id || !status || !professor_id) {
