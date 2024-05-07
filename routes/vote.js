@@ -16,6 +16,7 @@ router.post("/:project_id/:student_id", async (req, res) => {
         const studentExistsResult = await conn.query(
             "SELECT COUNT(*) AS count FROM students WHERE student_id = ?",
             [studentId]
+            
         );
 
         console.log("Student exists result:", studentExistsResult);
