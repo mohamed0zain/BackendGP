@@ -186,14 +186,12 @@ router.get("/:professor_id/requested-projects", async (req, res) => {
 });
 
 
-// Update Project Status API
+// Accept Project API
 
-router.put("/update/project-status", isProfessor ,async (req, res) => {
+router.put("/accept/project/:project_id/:professor_id", isProfessor, async (req, res) => {
     try {
-        const { project_id, status, professor_id } = req.body;
-        if (!project_id || !status || !professor_id) {
-            return res.status(400).json({ error: "Project ID, status, and professor ID are required" });
-        }
+        const { project_id, professor_id } = req.params;
+        const status = "Approved";
 
         const countQuery = "SELECT COUNT(*) AS count FROM projects WHERE project_id = ?";
         const [result] = await conn.query(countQuery, [project_id]);
@@ -210,21 +208,39 @@ router.put("/update/project-status", isProfessor ,async (req, res) => {
         const updateStatusQuery = "UPDATE projects SET approval_status = ? WHERE project_id = ?";
         await conn.query(updateStatusQuery, [status, project_id]);
 
-        if (status === "Approved") {
-            const checkProjectQuery = "SELECT COUNT(*) AS count FROM project_professor WHERE project_id = ? AND professor_id = ?";
-            const [projectResult] = await conn.query(checkProjectQuery, [project_id, professor_id]);
-            if (projectResult.count === 0) {
-                const addProjectQuery = "INSERT INTO project_professor (project_id, professor_id) VALUES (?, ?)";
-                await conn.query(addProjectQuery, [project_id, professor_id]);
-            }
-            const currentDate = new Date().toISOString().slice(0, 10);
-            const setRegistrationDateQuery = "UPDATE projects SET registration_date = ? WHERE project_id = ?";
-            await conn.query(setRegistrationDateQuery, [currentDate, project_id]);
+        const addProjectQuery = "INSERT INTO project_professor (project_id, professor_id) VALUES (?, ?)";
+        await conn.query(addProjectQuery, [project_id, professor_id]);
+
+        const currentDate = new Date().toISOString().slice(0, 10);
+        const setRegistrationDateQuery = "UPDATE projects SET registration_date = ? WHERE project_id = ?";
+        await conn.query(setRegistrationDateQuery, [currentDate, project_id]);
+
+        res.status(200).json({ message: "Project accepted successfully" });
+    } catch (err) {
+        console.error("Error accepting project:", err);
+        res.status(500).json({ error: "Server error" });
+    }
+});
+
+// Reject Project API
+
+router.put("/reject/project/:project_id/:professor_id", isProfessor, async (req, res) => {
+    try {
+        const { project_id } = req.params;
+        const status = "Rejected";
+
+        const countQuery = "SELECT COUNT(*) AS count FROM projects WHERE project_id = ?";
+        const [result] = await conn.query(countQuery, [project_id]);
+        if (!result || result.length === 0 || result.count === 0) {
+            return res.status(404).json({ error: "Project not found" });
         }
 
-        res.status(200).json({ message: "Project status updated successfully" });
+        const updateStatusQuery = "UPDATE projects SET approval_status = ? WHERE project_id = ?";
+        await conn.query(updateStatusQuery, [status, project_id]);
+
+        res.status(200).json({ message: "Project rejected successfully" });
     } catch (err) {
-        console.error("Error changing project status:", err);
+        console.error("Error rejecting project:", err);
         res.status(500).json({ error: "Server error" });
     }
 });
