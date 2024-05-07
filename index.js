@@ -23,7 +23,7 @@ const bookmark = require("./routes/bookmark");
 const admin = require("./routes/admin");
 const search = require("./routes/search");
 const download = require("./routes/download");
-
+const count = require("./routes/count");
 // ====================  RUN THE APP  ====================
 
 app.listen(4000, "localhost", () => {
@@ -41,3 +41,4 @@ app.use("/comment", comment);
 app.use("/admin", admin);
 app.use("/search",search);
 app.use("/download",download);
+app.use("/count",count);
