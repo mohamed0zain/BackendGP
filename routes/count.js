@@ -68,6 +68,7 @@ router.get('/department-count', (req, res) => {
     });
 });
 
+// Count prfessor requests
 router.get('/professor-project-count/:professor_id', (req, res) => {
     const professorId = req.params.professor_id;
     
