@@ -21,7 +21,7 @@ const student = require("./routes/student");
 const comment = require("./routes/comment");
 const bookmark = require("./routes/bookmark");
 const admin = require("./routes/admin");
-
+const search = require("./routes/search");
 
 // ====================  RUN THE APP  ====================
 
@@ -38,4 +38,4 @@ app.use("/student", student);
 app.use("/bookmark", bookmark);
 app.use("/comment", comment);
 app.use("/admin", admin);
-
+app.use("/search",search);
