@@ -90,12 +90,12 @@ router.get("/show-bookmarks/:student_id", async (req, res) => {
   const studentId = req.params.student_id;
 
   try {
-    const sql = `
-      SELECT bookmarks.bookmark_id, projects.title, projects.department_name, projects.total_votes
+    const sql =
+    `SELECT bookmarks.bookmark_id, bookmarks.project_id, projects.title, projects.department_name, projects.total_votes
       FROM bookmarks
       INNER JOIN projects ON bookmarks.project_id = projects.project_id
-      WHERE bookmarks.student_id = ?
-    `;
+      WHERE bookmarks.student_id = ?`;
+
     conn.query(sql, [studentId], (err, result) => {
       if (err) {
         console.error("Error retrieving bookmarks:", err);
@@ -109,7 +109,6 @@ router.get("/show-bookmarks/:student_id", async (req, res) => {
     res.status(500).json({ error: "Server error" });
   }
 });
-
 
 
 module.exports = router;
