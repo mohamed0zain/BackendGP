@@ -68,5 +68,22 @@ router.get('/department-count', (req, res) => {
     });
 });
 
+router.get('/professor-project-count/:professor_id', (req, res) => {
+    const professorId = req.params.professor_id;
+    
+    // Construct the SQL query to count the projects for the specific professor
+    const sql = 'SELECT COUNT(*) AS projectCount FROM projects WHERE professor_id = ?';
+    
+    // Execute the query
+    conn.query(sql, [professorId], (err, result) => {
+        if (err) {
+            console.error('Error executing SQL query:', err);
+            return res.status(500).json({ error: 'Server error' });
+        }
+        const projectCount = result[0].projectCount;
+        res.json({ projectCount });
+    });
+});
+
 
   module.exports = router;  
