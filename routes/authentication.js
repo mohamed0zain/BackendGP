@@ -126,7 +126,6 @@ router.post(
         student_email: email,
         student_password: await bcrypt.hash(req.body.password, 10),
         student_department: req.body.student_department,
-        student_project_id: null,
         student_token: crypto.randomBytes(16).toString("hex")
       };
 

@@ -90,11 +90,11 @@ router.get("/show-bookmarks/:student_id", async (req, res) => {
   const studentId = req.params.student_id;
 
   try {
-    const sql =
-    `SELECT bookmarks.bookmark_id, bookmarks.project_id, projects.title, projects.department_name, projects.total_votes
+    const sql = 
+    `SELECT bookmarks.bookmark_id, bookmarks.project_id, projects.title, projects.department_name, projects.total_votes, projects.supervisor_name, projects.graduation_term, projects.graduation_year, projects.github_link
       FROM bookmarks
       INNER JOIN projects ON bookmarks.project_id = projects.project_id
-      WHERE bookmarks.student_id = ?`;
+      WHERE bookmarks.student_id = ?;`
 
     conn.query(sql, [studentId], (err, result) => {
       if (err) {
