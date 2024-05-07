@@ -22,6 +22,7 @@ const comment = require("./routes/comment");
 const bookmark = require("./routes/bookmark");
 const admin = require("./routes/admin");
 const search = require("./routes/search");
+const download = require("./routes/download");
 
 // ====================  RUN THE APP  ====================
 
@@ -39,3 +40,4 @@ app.use("/bookmark", bookmark);
 app.use("/comment", comment);
 app.use("/admin", admin);
 app.use("/search",search);
+app.use("/download",download);
