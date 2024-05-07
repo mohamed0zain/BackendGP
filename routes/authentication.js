@@ -78,6 +78,9 @@ router.post(
       }
       return true;
     }),
+  body("student_id")
+    .isNumeric()
+    .withMessage("Please enter a valid student ID"),
   body("student_name")
     .isString()
     .withMessage("Please enter a valid name")
@@ -93,33 +96,50 @@ router.post(
         return res.status(400).json({ errors: errors.array() });
       }
 
+      const { student_id, email } = req.body;
+
+      // Check if student ID already exists
+      const existingStudentId = await conn.query(
+        "SELECT * FROM students WHERE student_id = ?",
+        [student_id]
+      );
+      if (existingStudentId.length > 0) {
+        return res.status(409).json({
+          error: "Student with the same ID already exists"
+        });
+      }
+
+      // Check if email already exists
+      const existingEmail = await conn.query(
+        "SELECT * FROM students WHERE student_email = ?",
+        [email]
+      );
+      if (existingEmail.length > 0) {
+        return res.status(409).json({
+          error: "Student with the same email already exists"
+        });
+      }
+
       const studentData = {
-        student_id: req.body.student_id,
+        student_id,
         student_name: req.body.student_name,
-        student_email: req.body.email,
+        student_email: email,
         student_password: await bcrypt.hash(req.body.password, 10),
         student_department: req.body.student_department,
         student_project_id: null,
-        student_token: crypto.randomBytes(16).toString("hex"),
+        student_token: crypto.randomBytes(16).toString("hex")
       };
-
 
       await conn.query("INSERT INTO students SET ? ", studentData);
       delete studentData.student_password;
       res.status(201).json(studentData);
     } catch (err) {
       console.error("Error registering student:", err);
-
-      if (err.sqlMessage && err.sqlMessage.includes("Duplicate entry")) {
-        return res.status(409).json({
-          error: "Duplicate entry for Student ID or Email",
-        });
-      }
-
       res.status(500).json({ error: "Server error" });
     }
   }
 );
+
 
 
 

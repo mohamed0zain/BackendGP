@@ -1,10 +1,11 @@
-const router = require("express").Router();
-const conn = require("../db/dbConnection");
-const { body, validationResult } = require("express-validator");
-const util = require("util");
-const bcrypt = require("bcrypt");
-const crypto = require("crypto");
-const saltRounds = 10;
+const express = require('express');
+const router = express.Router();
+const conn = require('../db/dbConnection'); // Importing the database connection
+const { body, validationResult } = require('express-validator');
+const util = require('util');
+const bcrypt = require('bcrypt');
+const crypto = require('crypto');
+
 
 
 // Get a list of pending projects
@@ -148,5 +149,145 @@ router.delete('/delete-student/:student_id', (req, res) => {
     }
   });
 });
+
+//Add a new department
+router.post('/departments', (req, res) => {
+  const newDepartmentName = req.body.department_name;
+
+  // Get the current options of the ENUM field
+  conn.query('SHOW COLUMNS FROM projects LIKE "department_name"', (err, result) => {
+    if (err) {
+      res.status(500).json({ error: 'Error retrieving department names' });
+    } else {
+      // Extract current options from the database result and filter out empty strings
+      const currentOptions = result[0].Type.match(/'([^']+)'/g).map(option => option.replace(/'/g, '')).filter(option => option !== '');
+
+      // Check if the new department name already exists
+      if (currentOptions.includes(newDepartmentName)) {
+        res.status(400).json({ error: 'Department name already exists' });
+      } else {
+        // Append the new department name to the current options
+        const updatedOptions = [...currentOptions, newDepartmentName];
+
+        // Modify the ENUM definition with the updated options
+        const newEnumDefinition = updatedOptions.map(option => `'${option}'`).join(',');
+        conn.query(`ALTER TABLE projects MODIFY department_name ENUM(${newEnumDefinition})`, (err, result) => {
+          if (err) {
+            res.status(500).json({ error: 'Error adding new department' });
+          } else {
+            res.status(200).json({ message: 'New department added successfully' });
+          }
+        });
+      }
+    }
+  });
+});
+
+//Delete department
+router.delete('/departments', (req, res) => {
+  const departmentName = req.body.department_name;
+
+  if (!departmentName) {
+    return res.status(400).json({ error: 'Department name is required in the request body' });
+  }
+
+  // Get the current options of the ENUM field
+  conn.query('SHOW COLUMNS FROM projects LIKE "department_name"', (err, result) => {
+    if (err) {
+      return res.status(500).json({ error: 'Error retrieving department names' });
+    } 
+    
+    // Extract current options from the database result and filter out empty strings
+    const currentOptions = result[0].Type.match(/'([^']+)'/g).map(option => option.replace(/'/g, '')).filter(option => option !== '');
+
+    // Check if the provided department name is in the current options
+    if (!currentOptions.includes(departmentName)) {
+      return res.status(404).json({ error: 'Department name not found in ENUM' });
+    }
+
+    // Remove the department name from the ENUM options
+    const updatedOptions = currentOptions.filter(option => option !== departmentName);
+
+    // Modify the ENUM definition with the updated options
+    const newEnumDefinition = updatedOptions.map(option => `'${option}'`).join(',');
+    conn.query(`ALTER TABLE projects MODIFY department_name ENUM(${newEnumDefinition})`, (err, result) => {
+      if (err) {
+        return res.status(500).json({ error: 'Error deleting department' });
+      }
+      return res.status(200).json({ message: 'Department deleted successfully' });
+    });
+  });
+});
+
+
+// Add a new graduation term  
+router.post('/graduation-terms', (req, res) => {
+  const newGraduationTerm = req.body.graduation_term;
+
+  // Get the current options of the ENUM field
+  conn.query('SHOW COLUMNS FROM projects LIKE "graduation_term"', (err, result) => {
+    if (err) {
+      res.status(500).json({ error: 'Error retrieving graduation terms' });
+    } else {
+      // Extract current options from the database result and filter out empty strings
+      const currentOptions = result[0].Type.match(/'([^']+)'/g).map(option => option.replace(/'/g, '')).filter(option => option !== '');
+
+      // Check if the new graduation term already exists
+      if (currentOptions.includes(newGraduationTerm)) {
+        res.status(400).json({ error: 'Graduation term already exists' });
+      } else {
+        // Append the new graduation term to the current options
+        const updatedOptions = [...currentOptions, newGraduationTerm];
+
+        // Modify the ENUM definition with the updated options
+        const newEnumDefinition = updatedOptions.map(option => `'${option}'`).join(',');
+        conn.query(`ALTER TABLE projects MODIFY graduation_term ENUM(${newEnumDefinition})`, (err, result) => {
+          if (err) {
+            res.status(500).json({ error: 'Error adding new graduation term' });
+          } else {
+            res.status(200).json({ message: 'New graduation term added successfully' });
+          }
+        });
+      }
+    }
+  });
+});
+
+//Delete a graduation term
+router.delete('/graduation-terms', (req, res) => {
+  const graduationTerm = req.body.graduation_term;
+
+  if (!graduationTerm) {
+    return res.status(400).json({ error: 'Graduation term is required in the request body' });
+  }
+
+  // Get the current options of the ENUM field
+  conn.query('SHOW COLUMNS FROM projects LIKE "graduation_term"', (err, result) => {
+    if (err) {
+      return res.status(500).json({ error: 'Error retrieving graduation terms' });
+    } 
+    
+    // Extract current options from the database result and filter out empty strings
+    const currentOptions = result[0].Type.match(/'([^']+)'/g).map(option => option.replace(/'/g, '')).filter(option => option !== '');
+
+    // Check if the provided graduation term is in the current options
+    if (!currentOptions.includes(graduationTerm)) {
+      return res.status(404).json({ error: 'Graduation term not found in ENUM' });
+    }
+
+    // Remove the graduation term from the ENUM options
+    const updatedOptions = currentOptions.filter(option => option !== graduationTerm);
+
+    // Modify the ENUM definition with the updated options
+    const newEnumDefinition = updatedOptions.map(option => `'${option}'`).join(',');
+    conn.query(`ALTER TABLE projects MODIFY graduation_term ENUM(${newEnumDefinition})`, (err, result) => {
+      if (err) {
+        return res.status(500).json({ error: 'Error deleting graduation term' });
+      }
+      return res.status(200).json({ message: 'Graduation term deleted successfully' });
+    });
+  });
+});
+
 
 module.exports = router;
