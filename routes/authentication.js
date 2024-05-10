@@ -17,16 +17,17 @@ router.post(
     .withMessage("Password should be between (8-12) characters"),
   async (req, res) => {
     try {
-
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
         return res.status(400).json({ errors: errors.array() });
       }
 
       const query = util.promisify(conn.query).bind(conn);
-      const student = await query("select * from students where student_id = ?", [
-        req.body.student_id,
-      ]);
+      const student = await query(
+        "SELECT * FROM students WHERE student_id = ?",
+        [req.body.student_id]
+      );
+
       if (student.length === 0) {
         res.status(404).json({
           errors: [
@@ -42,12 +43,21 @@ router.post(
         req.body.password,
         student[0].student_password
       );
+
       if (checkPassword) {
-        delete student[0].student_password;
+        // Generate a new token
         const newToken = crypto.randomBytes(16).toString("hex");
+        // Update the student_token in the database
+        await query(
+          "UPDATE students SET student_token = ? WHERE student_id = ?",
+          [newToken, req.body.student_id]
+        );
+
+        // Remove the password from the response
+        delete student[0].student_password;
+
+        // Send the updated student data along with the new token
         student[0].student_token = newToken;
-
-
         res.status(200).json(student[0]);
       } else {
         res.status(404).json({

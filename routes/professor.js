@@ -9,54 +9,64 @@ const isProfessor = require("../middleware/isProfessor");
 
 
 // Login professor
-
 router.post(
-    "/professor-login",
-    body("professor_email")
-      .isEmail()
-      .withMessage("Please enter a valid email"),
-    body("password")
-      .isLength({ min: 8, max: 12 })
-      .withMessage("Password should be between 8 to 12 characters"),
-    async (req, res) => {
-      try {
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-          return res.status(400).json({ errors: errors.array() });
-        }
-
-        const query = util.promisify(conn.query).bind(conn);
-        const professor = await query(
-          "SELECT * FROM professor WHERE professor_email = ?",
-          [req.body.professor_email]
-        );
-        if (professor.length === 0) {
-          return res.status(404).json({
-            errors: [{ msg: "Professor email or password not found!" }],
-          });
-        }
-
-        const checkPassword = await bcrypt.compare(
-          req.body.password,
-          professor[0].professor_password
-        );
-        if (checkPassword) {
-          delete professor[0].professor_password;
-          const newToken = crypto.randomBytes(16).toString("hex");
-          professor[0].professor_token = newToken;
-
-          res.status(200).json(professor[0]);
-        } else {
-          res.status(404).json({
-            errors: [{ msg: "Professor email or password not found!" }],
-          });
-        }
-      } catch (err) {
-        console.error("Error logging in professor:", err);
-        res.status(500).json({ err: "Server error" });
+  "/professor-login",
+  body("professor_email")
+    .isEmail()
+    .withMessage("Please enter a valid email"),
+  body("password")
+    .isLength({ min: 8, max: 12 })
+    .withMessage("Password should be between 8 to 12 characters"),
+  async (req, res) => {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
       }
+
+      const query = util.promisify(conn.query).bind(conn);
+      const professor = await query(
+        "SELECT * FROM professor WHERE professor_email = ?",
+        [req.body.professor_email]
+      );
+
+      if (professor.length === 0) {
+        return res.status(404).json({
+          errors: [{ msg: "Professor email or password not found!" }],
+        });
+      }
+
+      const checkPassword = await bcrypt.compare(
+        req.body.password,
+        professor[0].professor_password
+      );
+
+      if (checkPassword) {
+        // Generate a new token
+        const newToken = crypto.randomBytes(16).toString("hex");
+        // Update the professor_token in the database
+        await query(
+          "UPDATE professor SET professor_token = ? WHERE professor_email = ?",
+          [newToken, req.body.professor_email]
+        );
+
+        // Remove the password from the response
+        delete professor[0].professor_password;
+
+        // Send the updated professor data along with the new token
+        professor[0].professor_token = newToken;
+        res.status(200).json(professor[0]);
+      } else {
+        res.status(404).json({
+          errors: [{ msg: "Professor email or password not found!" }],
+        });
+      }
+    } catch (err) {
+      console.error("Error logging in professor:", err);
+      res.status(500).json({ err: "Server error" });
     }
-  );
+  }
+);
 
 // GET Professor Profile
 
