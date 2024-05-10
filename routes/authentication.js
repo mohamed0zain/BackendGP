@@ -203,8 +203,7 @@ router.put(
   param("student_id").isInt().withMessage("Please enter a valid student ID (integer)"),
   body("current_email").isEmail().withMessage("Please enter a valid current email"),
   body("new_email")
-    .isEmail()
-    .withMessage("Please enter a valid new email")
+    .isEmail().withMessage("Please enter a valid new email")
     .custom(async (value, { req }) => {
       const studentId = req.params.student_id;
       const currentEmail = req.body.current_email;
@@ -233,8 +232,7 @@ router.put(
   async (req, res) => {
     try {
       const { student_id } = req.params;
-      const { new_email } = req.body;
-      const currentEmail = req.body.current_email; // Retrieve current email
+      const { new_email, current_email } = req.body;
 
       // Check for validation errors
       const errors = validationResult(req);
@@ -243,7 +241,7 @@ router.put(
       }
 
       // Check if student exists and if the provided current email matches
-      const student = await conn.query("SELECT * FROM students WHERE student_id = ? AND student_email = ?", [student_id, currentEmail]);
+      const student = await conn.query("SELECT * FROM students WHERE student_id = ? AND student_email = ?", [student_id, current_email]);
       if (student.length === 0) {
         return res.status(404).json({
           error: "Student not found or current email does not match"

@@ -290,6 +290,20 @@ router.delete('/graduation-terms', (req, res) => {
 });
 
 
+// Get all department names
+router.get('/show-departments', (req, res) => {
+  // Get the current options of the ENUM field
+  conn.query('SHOW COLUMNS FROM projects LIKE "department_name"', (err, result) => {
+    if (err) {
+      return res.status(500).json({ error: 'Error retrieving department names' });
+    } 
+    
+    // Extract current options from the database result and filter out empty strings
+    const currentOptions = result[0].Type.match(/'([^']+)'/g).map(option => option.replace(/'/g, '')).filter(option => option !== '');
+
+    return res.status(200).json({ department_names: currentOptions });
+  });
+});
 
 
 

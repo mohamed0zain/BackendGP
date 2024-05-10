@@ -301,7 +301,6 @@ router.put("/project/assign-grades", async (req, res) => {
 });
 
 
-
 // Change Email for Professor
 router.put(
     "/:professor_id/change-email",
@@ -364,9 +363,6 @@ router.put(
     }
   );
   
-
-
-
 
 // Change Password for Professor
 router.put(
