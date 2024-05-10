@@ -11,27 +11,38 @@ router.post("/add-bookmark/:project_id/:student_id", async (req, res) => {
   const { student_id, project_id } = req.params;
 
   try {
-      const bookmarkExists = await checkBookmarkExists(student_id, project_id);
+    const bookmarkExists = await checkBookmarkExists(student_id, project_id);
 
-      if (bookmarkExists) {
-          await removeBookmark(student_id, project_id);
-          return res.status(200).json({ message: "Bookmark removed successfully" });
-      } else {
-          const projectDetails = await getProjectDetails(project_id);
+    if (bookmarkExists) {
+      await removeBookmark(student_id, project_id);
+      return res.status(200).json({
+        bookmarkStatus: false,
+        message: "Bookmark removed successfully",
+      });
+    } else {
+      const projectDetails = await getProjectDetails(project_id);
 
-          if (!projectDetails) {
-              return res.status(404).json({ error: "Project not found" });
-          }
-
-          const { title, department_name, total_votes } = projectDetails;
-
-          await insertBookmark(student_id, project_id, title, department_name, total_votes);
-
-          return res.status(201).json({ message: "Bookmark added successfully" });
+      if (!projectDetails) {
+        return res.status(404).json({ error: "Project not found" });
       }
+
+      const { title, department_name, total_votes } = projectDetails;
+
+      await insertBookmark(
+        student_id,
+        project_id,
+        title,
+        department_name,
+        total_votes
+      );
+
+      return res
+        .status(201)
+        .json({ bookmarkStatus: true, message: "Bookmark added successfully" });
+    }
   } catch (error) {
-      console.error("Error adding/removing bookmark:", error);
-      res.status(500).json({ error: "Failed to add/remove bookmark" });
+    console.error("Error adding/removing bookmark:", error);
+    res.status(500).json({ error: "Failed to add/remove bookmark" });
   }
 });
 
