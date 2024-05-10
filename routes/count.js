@@ -68,23 +68,31 @@ router.get('/department-count', (req, res) => {
     });
 });
 
-// Count prfessor requests
 router.get('/professor-project-count/:professor_id', (req, res) => {
-    const professorId = req.params.professor_id;
-    
-    // Construct the SQL query to count the projects for the specific professor
-    const sql = 'SELECT COUNT(*) AS projectCount FROM projects WHERE professor_id = ?';
-    
-    // Execute the query
-    conn.query(sql, [professorId], (err, result) => {
-        if (err) {
-            console.error('Error executing SQL query:', err);
-            return res.status(500).json({ error: 'Server error' });
-        }
-        const projectCount = result[0].projectCount;
-        res.json({ projectCount });
-    });
+  const professorId = req.params.professor_id;
+  
+  // Construct the SQL query to count the projects for the specific professor
+  const sql = `
+      SELECT 
+          COUNT(*) AS totalProjects,
+          SUM(CASE WHEN approval_status = 'Accepted' THEN 1 ELSE 0 END) AS acceptedProjects,
+          SUM(CASE WHEN approval_status = 'Rejected' THEN 1 ELSE 0 END) AS rejectedProjects,
+          SUM(CASE WHEN approval_status = 'Pending' THEN 1 ELSE 0 END) AS pendingProjects
+      FROM projects 
+      WHERE professor_id = ?
+  `;
+  
+  // Execute the query
+  conn.query(sql, [professorId], (err, result) => {
+      if (err) {
+          console.error('Error executing SQL query:', err);
+          return res.status(500).json({ error: 'Server error' });
+      }
+      const { totalProjects, acceptedProjects, rejectedProjects, pendingProjects } = result[0];
+      res.json({ totalProjects, acceptedProjects, rejectedProjects, pendingProjects });
+  });
 });
+
 
 
   module.exports = router;  

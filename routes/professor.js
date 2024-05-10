@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { body, validationResult } = require("express-validator");
+const { body, param,validationResult } = require("express-validator");
 const bcrypt = require("bcrypt");
 const util = require("util");
 const conn = require("../db/dbConnection");
@@ -299,5 +299,133 @@ router.put("/project/assign-grades", async (req, res) => {
         res.status(500).json({ error: "Server error" });
     }
 });
+
+
+
+// Change Email for Professor
+router.put(
+    "/:professor_id/change-email",
+    param("professor_id").isInt().withMessage("Please enter a valid professor ID (integer)"),
+    body("current_email").isEmail().withMessage("Please enter a valid current email"),
+    body("new_email")
+      .isEmail().withMessage("Please enter a valid new email")
+      .custom(async (value, { req }) => {
+        const professorId = req.params.professor_id;
+        const currentEmail = req.body.current_email;
+  
+        // Check if the new email is different from the current one
+        if (value === currentEmail) {
+          throw new Error("New email must be different from the current one");
+        }
+  
+        // Check if the new email ends with "@fci.helwan.edu.eg"
+        if (!value.endsWith("@fci.helwan.edu.eg")) {
+          throw new Error("Email domain must be '@fci.helwan.edu.eg'");
+        }
+  
+        // Check if the new email is already registered for another professor
+        const existingEmail = await conn.query(
+          "SELECT * FROM professor WHERE professor_email = ? AND professor_id != ?",
+          [value, professorId]
+        );
+        if (existingEmail.length > 0) {
+          throw new Error("Professor with the same email already exists");
+        }
+  
+        return true;
+      }),
+    async (req, res) => {
+      try {
+        const { professor_id } = req.params;
+        const { new_email, current_email } = req.body;
+  
+        // Check for validation errors
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+          return res.status(400).json({ errors: errors.array() });
+        }
+  
+        // Check if professor exists and if the provided current email matches
+        const professor = await conn.query("SELECT * FROM professor WHERE professor_id = ? AND professor_email = ?", [professor_id, current_email]);
+        if (professor.length === 0) {
+          return res.status(404).json({
+            error: "Professor not found or current email does not match"
+          });
+        }
+  
+        // Update professor's email with the new one
+        await conn.query("UPDATE professor SET professor_email = ? WHERE professor_id = ?", [new_email, professor_id]);
+  
+        res.status(200).json({ message: "Email updated successfully" });
+      } catch (err) {
+        console.error("Error changing email for professor:", err);
+        res.status(500).json({ error: "Server error" });
+      }
+    }
+  );
+  
+
+
+
+
+// Change Password for Professor
+router.put(
+    "/:professor_id/change-password",
+    param("professor_id").isInt().withMessage("Please enter a valid professor ID (integer)"),
+    body("old_password")
+      .isLength({ min: 8, max: 12 })
+      .withMessage("Old password should be between (8-12) characters"),
+    body("new_password")
+      .isLength({ min: 8, max: 12 })
+      .withMessage("New password should be between (8-12) characters")
+      .custom(async (value, { req }) => {
+        const professorId = req.params.professor_id;
+        const oldPassword = req.body.old_password;
+  
+        // Check if the old password is the same as the new password
+        if (value === oldPassword) {
+          throw new Error("New password must be different from the old one");
+        }
+  
+        return true;
+      }),
+    async (req, res) => {
+      try {
+        const professorId = req.params.professor_id;
+        const { old_password, new_password } = req.body;
+  
+        // Check for validation errors
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+          return res.status(400).json({ errors: errors.array() });
+        }
+  
+        // Check if old password matches the one stored in the database
+        const professor = await conn.query("SELECT * FROM professor WHERE professor_id = ?", [professorId]);
+        if (professor.length === 0) {
+          return res.status(404).json({
+            error: "Professor not found"
+          });
+        }
+  
+        const checkOldPassword = await bcrypt.compare(old_password, professor[0].professor_password);
+        if (!checkOldPassword) {
+          return res.status(400).json({
+            error: "Old password is incorrect"
+          });
+        }
+  
+        // Update professor's password with the new one
+        const hashedNewPassword = await bcrypt.hash(new_password, 10);
+        await conn.query("UPDATE professor SET professor_password = ? WHERE professor_id = ?", [hashedNewPassword, professorId]);
+  
+        res.status(200).json({ message: "Password updated successfully" });
+      } catch (err) {
+        console.error("Error changing password for professor:", err);
+        res.status(500).json({ error: "Server error" });
+      }
+    }
+  );
+  
 
 module.exports = router;

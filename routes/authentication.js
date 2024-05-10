@@ -1,6 +1,6 @@
 const router = require("express").Router();
 const conn = require("../db/dbConnection");
-const { body, validationResult } = require("express-validator");
+const { body, param, validationResult } = require("express-validator");
 const util = require("util");
 const bcrypt = require("bcrypt");
 const crypto = require("crypto");
@@ -139,8 +139,127 @@ router.post(
   }
 );
 
+// Change Password for Student
+router.put(
+  "/:student_id/change-password",
+  body("old_password")
+    .isLength({ min: 8, max: 12 })
+    .withMessage("Old password should be between (8-12) characters"),
+  body("new_password")
+    .isLength({ min: 8, max: 12 })
+    .withMessage("New password should be between (8-12) characters")
+    .custom(async (value, { req }) => {
+      const oldPassword = req.body.old_password;
+
+      // Check if the old password is the same as the new password
+      if (value === oldPassword) {
+        throw new Error("New password must be different from the old one");
+      }
+
+      return true;
+    }),
+  async (req, res) => {
+    try {
+      const studentId = req.params.student_id;
+      const { old_password, new_password } = req.body;
+
+      // Check for validation errors
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+      }
+
+      // Check if old password matches the one stored in the database
+      const student = await conn.query("SELECT * FROM students WHERE student_id = ?", [studentId]);
+      if (student.length === 0) {
+        return res.status(404).json({
+          error: "Student not found"
+        });
+      }
+
+      const checkOldPassword = await bcrypt.compare(old_password, student[0].student_password);
+      if (!checkOldPassword) {
+        return res.status(400).json({
+          error: "Old password is incorrect"
+        });
+      }
+
+      // Update student's password with the new one
+      const hashedNewPassword = await bcrypt.hash(new_password, 10);
+      await conn.query("UPDATE students SET student_password = ? WHERE student_id = ?", [hashedNewPassword, studentId]);
+
+      res.status(200).json({ message: "Password updated successfully" });
+    } catch (err) {
+      console.error("Error changing password for student:", err);
+      res.status(500).json({ error: "Server error" });
+    }
+  }
+);
 
 
+// Change Email for Student
+router.put(
+  "/:student_id/change-email",
+  param("student_id").isInt().withMessage("Please enter a valid student ID (integer)"),
+  body("current_email").isEmail().withMessage("Please enter a valid current email"),
+  body("new_email")
+    .isEmail()
+    .withMessage("Please enter a valid new email")
+    .custom(async (value, { req }) => {
+      const studentId = req.params.student_id;
+      const currentEmail = req.body.current_email;
+
+      // Check if the new email is different from the current one
+      if (value === currentEmail) {
+        throw new Error("New email must be different from the current one");
+      }
+
+      // Check if the new email ends with "@fci.helwan.edu.eg"
+      if (!value.endsWith("@fci.helwan.edu.eg")) {
+        throw new Error("Email domain must be '@fci.helwan.edu.eg'");
+      }
+
+      // Check if the new email is already registered for another student
+      const existingEmail = await conn.query(
+        "SELECT * FROM students WHERE student_email = ? AND student_id != ?",
+        [value, studentId]
+      );
+      if (existingEmail.length > 0) {
+        throw new Error("Student with the same email already exists");
+      }
+
+      return true;
+    }),
+  async (req, res) => {
+    try {
+      const { student_id } = req.params;
+      const { new_email } = req.body;
+      const currentEmail = req.body.current_email; // Retrieve current email
+
+      // Check for validation errors
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+      }
+
+      // Check if student exists and if the provided current email matches
+      const student = await conn.query("SELECT * FROM students WHERE student_id = ? AND student_email = ?", [student_id, currentEmail]);
+      if (student.length === 0) {
+        return res.status(404).json({
+          error: "Student not found or current email does not match"
+        });
+      }
+
+      // Update student's email with the new one
+      await conn.query("UPDATE students SET student_email = ? WHERE student_id = ?", [new_email, student_id]);
+
+      res.status(200).json({ message: "Email updated successfully" });
+    } catch (err) {
+      console.error("Error changing email for student:", err);
+      res.status(500).json({ error: "Server error" });
+    }
+  }
+);
 
 
 
