@@ -13,12 +13,21 @@ router.post('/add-comment/:project_id', async (req, res) => {
   const project_id = req.params.project_id;
 
   try {
-    const result = await insertComment(project_id, commenter_id, comment_text);
+      const result = await insertComment(project_id, commenter_id, comment_text);
 
-    res.status(201).json({ message: 'Comment added successfully', comment_id: result.insertId });
+      const studentRows = await conn.query(
+          "SELECT student_id FROM project_students WHERE project_id = ?",
+          [project_id]
+      );
+      const students = studentRows.map(row => row.student_id);
+
+      const notificationMessage = `User with id ${commenter_id} has added a comment to your project.`;
+      await Promise.all(students.map(student => createNotification(student, commenter_id, project_id, 'comment', notificationMessage)));
+
+      res.status(201).json({ message: 'Comment added successfully', comment_id: result.insertId });
   } catch (err) {
-    console.error('Error adding comment:', err);
-    res.status(500).json({ error: 'Server error while adding comment' });
+      console.error('Error adding comment:', err);
+      res.status(500).json({ error: 'Server error while adding comment' });
   }
 });
 
@@ -26,25 +35,35 @@ router.post('/add-comment/:project_id', async (req, res) => {
 
 function insertComment(project_id, commenter_id, comment_text) {
   return new Promise((resolve, reject) => {
-    const query = 'SELECT student_name FROM students WHERE student_id = ?';
+      const query = 'SELECT student_name FROM students WHERE student_id = ?';
 
-    conn.query(query, [commenter_id], (err, results) => {
-      if (err) {
-        reject(err);
-      } else {
-        const commenter_name = results[0] ? results[0].student_name : null;
-
-        const sql = 'INSERT INTO comments (project_id, commenter_id, commenter_name, comment_text) VALUES (?, ?, ?, ?)';
-        const values = [project_id, commenter_id, commenter_name, comment_text];
-
-        conn.query(sql, values, (err, result) => {
+      conn.query(query, [commenter_id], (err, results) => {
           if (err) {
-            reject(err);
+              reject(err);
           } else {
-            resolve(result);
+              const commenter_name = results[0] ? results[0].student_name : null;
+
+              const sql = 'INSERT INTO comments (project_id, commenter_id, commenter_name, comment_text) VALUES (?, ?, ?, ?)';
+              const values = [project_id, commenter_id, commenter_name, comment_text];
+
+              conn.query(sql, values, (err, result) => {
+                  if (err) {
+                      reject(err);
+                  } else {
+                      resolve(result);
+                  }
+              });
           }
-        });
-      }
+      });
+  });
+}
+
+async function createNotification(recipientId, senderId, projectId, notificationType, message) {
+  return new Promise((resolve, reject) => {
+    const sql = "INSERT INTO notifications (recipient_id, sender_id, project_id, notification_type, notification_message, read_status) VALUES (?, ?, ?, ?, ?, 'unread')";
+    conn.query(sql, [recipientId, senderId, projectId, notificationType, message], (err, result) => {
+      if (err) reject(err);
+      else resolve(result);
     });
   });
 }
@@ -56,7 +75,7 @@ router.get("/show-comments/:project_id", async (req, res) => {
 
   try {
     const sql = 'SELECT * FROM comments WHERE project_id = ?';
-    
+
     conn.query(sql, [project_id], (err, results) => {
       if (err) {
         console.error("Error fetching comments:", err);
@@ -78,7 +97,7 @@ router.delete("/delete-comment/:comment_id", async (req, res) => {
 
   try {
     const sql = 'DELETE FROM comments WHERE comment_id = ?';
-    
+
     conn.query(sql, [comment_id], (err, result) => {
       if (err) {
         console.error("Error deleting comment:", err);
