@@ -24,6 +24,7 @@ const admin = require("./routes/admin");
 const search = require("./routes/search");
 const download = require("./routes/download");
 const count = require("./routes/count");
+const notification = require("./routes/notification");
 // ====================  RUN THE APP  ====================
 
 app.listen(4000, "localhost", () => {
@@ -42,3 +43,4 @@ app.use("/admin", admin);
 app.use("/search",search);
 app.use("/download",download);
 app.use("/count",count);
+app.use("/notification", notification);

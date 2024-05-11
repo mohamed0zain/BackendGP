@@ -14,7 +14,7 @@ const storage = multer.diskStorage({
   });
   const upload = multer({ storage });
 
-  // Create Project
+ // Create Project
 
 router.post("/create", upload.single("projectFile"), async (req, res) => {
   const {
@@ -60,6 +60,9 @@ router.post("/create", upload.single("projectFile"), async (req, res) => {
       }
     }
 
+    const notificationMessage = `A new project '${title}' has been submitted for your approval.`;
+    await createNotification(professor_id, null, projectId, 'project_request', notificationMessage);
+
     await commitTransaction();
 
     res.status(201).json({ message: "Project and student associations created successfully" });
@@ -80,6 +83,16 @@ router.post("/create", upload.single("projectFile"), async (req, res) => {
     res.status(500).json({ error: "Server error during project creation. Transaction has been rolled back." });
   }
 });
+
+async function createNotification(recipientId, senderId, projectId, notificationType, message) {
+  return new Promise((resolve, reject) => {
+    const sql = "INSERT INTO notifications (recipient_id, sender_id, project_id, notification_type, notification_message, read_status) VALUES (?, ?, ?, ?, ?, 'unread')";
+    conn.query(sql, [recipientId, senderId, projectId, notificationType, message], (err, result) => {
+      if (err) reject(err);
+      else resolve(result);
+    });
+  });
+}
 
 function checkExistingStudents(studentIds) {
   return new Promise((resolve, reject) => {
