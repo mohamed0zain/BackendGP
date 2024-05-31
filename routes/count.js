@@ -93,6 +93,168 @@ router.get('/professor-project-count/:professor_id', (req, res) => {
   });
 });
 
+// the average of studnets grade by project ID
+router.get('/average-grades/:project_id', async (req, res) => {
+  const { project_id } = req.params;
+
+  try {
+    // Fetch grades for the given project ID
+    const gradesQuery = 'SELECT semester_work_grade, final_work_grade FROM project_students WHERE project_id = ?';
+    conn.query(gradesQuery, [project_id], (err, results) => {
+      if (err) {
+        console.error('Error executing SQL query:', err);
+        return res.status(500).json({ error: 'Server error' });
+      }
+
+      if (results.length === 0) {
+        return res.status(404).json({ error: 'No students found for this project ID' });
+      }
+
+      // Calculate the average of semester work grades and final work grades
+      let totalSemesterGrade = 0;
+      let totalFinalGrade = 0;
+      results.forEach(row => {
+        totalSemesterGrade += row.semester_work_grade;
+        totalFinalGrade += row.final_work_grade;
+      });
+
+      const averageSemesterGrade = totalSemesterGrade / results.length;
+      const averageFinalGrade = totalFinalGrade / results.length;
+      const averageOverallGrade = (averageSemesterGrade + averageFinalGrade) / 2;
+
+      // Return the average grades
+      res.json({
+        averageSemesterGrade: averageSemesterGrade.toFixed(2),
+        averageFinalGrade: averageFinalGrade.toFixed(2),
+        averageOverallGrade: averageOverallGrade.toFixed(2)
+      });
+    });
+  } catch (error) {
+    console.error('Error calculating average grades:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// The top 3 bookmarked projects
+router.get('/most-bookmarked-projects', async (req, res) => {
+  try {
+    const sql = `
+      SELECT title, COUNT(*) as bookmark_count
+      FROM bookmarks
+      GROUP BY title
+      ORDER BY bookmark_count DESC
+      LIMIT 3
+    `;
+
+    conn.query(sql, (err, results) => {
+      if (err) {
+        console.error('Error executing SQL query:', err);
+        return res.status(500).json({ error: 'Server error' });
+      }
+      res.json(results);
+    });
+  } catch (err) {
+    console.error('Error fetching most bookmarked projects:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+
+//average grade for department
+router.get('/average-grades-by-department', async (req, res) => {
+  try {
+      const sql = `
+          SELECT 
+              p.department_name,
+              AVG(ps.semester_work_grade) AS avg_semester_work_grade,
+              AVG(ps.final_work_grade) AS avg_final_work_grade,
+              AVG(ps.overall_grade) AS avg_overall_grade
+          FROM 
+              project_students ps
+          JOIN 
+              projects p ON ps.project_id = p.project_id
+          GROUP BY 
+              p.department_name;
+      `;
+
+      conn.query(sql, (err, results) => {
+          if (err) {
+              console.error('Error executing SQL query:', err);
+              return res.status(500).json({ error: 'Server error' });
+          }
+          res.json(results);
+      });
+  } catch (error) {
+      console.error('Error:', error);
+      res.status(500).json({ error: 'Server error' });
+  }
+});
+
+//average grade for professer
+router.get('/average-grade-by-professor', async (req, res) => {
+  try {
+    const sql = `
+      SELECT 
+        pp.professor_id,
+        AVG(ps.overall_grade) AS average_grade
+      FROM 
+        project_professor pp
+      INNER JOIN 
+        project_students ps ON pp.project_id = ps.project_id
+      GROUP BY 
+        pp.professor_id
+    `;
+    conn.query(sql, (err, results) => {
+      if (err) {
+        console.error('Error executing SQL query:', err);
+        return res.status(500).json({ error: 'Server error' });
+      }
+      res.json(results);
+    });
+  } catch (error) {
+    console.error('Error calculating average grade by professor:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// The top 3 voted projects
+router.get('/most-voted-projects', (req, res) => {
+  const sql = 'SELECT title, total_votes FROM projects ORDER BY total_votes DESC LIMIT 3';
+
+  conn.query(sql, (err, results) => {
+      if (err) {
+          console.error('Error executing SQL query:', err);
+          return res.status(500).json({ error: 'Server error' });
+      }
+      res.json(results);
+  });
+});
+
+
+// the top 3 commented projects
+router.get('/most-commented-projects', async (req, res) => {
+  try {
+      const sql = `
+          SELECT p.title, COUNT(c.comment_id) AS comment_count
+          FROM projects p
+          LEFT JOIN comments c ON p.project_id = c.project_id
+          GROUP BY p.title
+          ORDER BY comment_count DESC
+          LIMIT 3`;
+      
+      conn.query(sql, (err, results) => {
+          if (err) {
+              console.error('Error executing SQL query:', err);
+              return res.status(500).json({ error: 'Server error' });
+          }
+          res.json(results);
+      });
+  } catch (error) {
+      console.error("Error calculating most commented projects:", error);
+      res.status(500).json({ error: "Server error" });
+  }
+});
+
 
 
   module.exports = router;  
