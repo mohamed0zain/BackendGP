@@ -7,6 +7,124 @@ const bcrypt = require('bcrypt');
 const crypto = require('crypto');
 
 
+// add admin
+router.post(
+  "/add-admin",
+  body("admin_name")
+    .notEmpty()
+    .withMessage("Admin name is required"),
+  body("admin_email")
+    .isEmail()
+    .withMessage("Please enter a valid email")
+    .matches(/@fci.helwan.edu.eg$/)
+    .withMessage("Email must end with @fci.helwan.edu.eg"),
+  body("admin_password")
+    .isLength({ min: 8, max: 12 })
+    .withMessage("Password should be between 8 to 12 characters"),
+  async (req, res) => {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+      }
+
+      const { admin_name, admin_email, admin_password } = req.body;
+
+      // Check if admin already exists
+      const query = util.promisify(conn.query).bind(conn);
+      const existingAdmin = await query(
+        "SELECT * FROM admin WHERE admin_email = ?",
+        [admin_email]
+      );
+
+      if (existingAdmin.length > 0) {
+        return res.status(400).json({
+          errors: [{ msg: "Admin with this email already exists!" }],
+        });
+      }
+
+      // Hash the password
+      const hashedPassword = await bcrypt.hash(admin_password, 10);
+
+      // Generate a token
+      const admin_token = crypto.randomBytes(16).toString("hex");
+
+      // Insert the new admin
+      const result = await query(
+        "INSERT INTO admin (admin_name, admin_email, admin_password, admin_token) VALUES (?, ?, ?, ?)",
+        [admin_name, admin_email, hashedPassword, admin_token]
+      );
+
+      if (result.affectedRows === 1) {
+        res.status(201).json({ msg: "Admin registered successfully!" });
+      } else {
+        res.status(500).json({ error: "Failed to insert admin" });
+      }
+    } catch (err) {
+      console.error("Error registering admin:", err);
+      res.status(500).json({ error: "Server error" });
+    }
+  }
+);
+//login as admin
+router.post(
+  "/admin-login",
+  body("admin_email")
+    .isEmail()
+    .withMessage("Please enter a valid email"),
+  body("admin_password")
+    .isLength({ min: 4, max: 12 })
+    .withMessage("Password should be between 4 to 12 characters"),
+  async (req, res) => {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+      }
+
+      const query = util.promisify(conn.query).bind(conn);
+      const admin = await query(
+        "SELECT * FROM admin WHERE admin_email = ?",
+        [req.body.admin_email]
+      );
+
+      if (admin.length === 0) {
+        return res.status(404).json({
+          errors: [{ msg: "Admin email or password not found!" }],
+        });
+      }
+
+      const checkPassword = await bcrypt.compare(
+        req.body.admin_password,
+        admin[0].admin_password
+      );
+
+      if (checkPassword) {
+        // Generate a new token
+        const newToken = crypto.randomBytes(16).toString("hex");
+        // Update the admin_token in the database
+        await query(
+          "UPDATE admin SET admin_token = ? WHERE admin_email = ?",
+          [newToken, req.body.admin_email]
+        );
+
+        // Remove the password from the response
+        delete admin[0].admin_password;
+
+        // Send the updated admin data along with the new token
+        admin[0].admin_token = newToken;
+        res.status(200).json(admin[0]);
+      } else {
+        res.status(404).json({
+          errors: [{ msg: "Admin email or password not found!" }],
+        });
+      }
+    } catch (err) {
+      console.error("Error logging in admin:", err);
+      res.status(500).json({ err: "Server error" });
+    }
+  }
+);
 
 // Get a list of pending projects
 
