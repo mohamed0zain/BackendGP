@@ -361,9 +361,40 @@ router.get('/average-grades-by-graduation-term', async (req, res) => {
   }
 });
 
+// succes rate by department
+router.get('/success-rate-by-department', async (req, res) => {
+  try {
+      const sql = `
+          SELECT
+              p.department_name,
+              COUNT(ps.student_id) AS total_students,
+              SUM(CASE WHEN ps.overall_grade >= (ps.max_overall_grade / 2) THEN 1 ELSE 0 END) AS successful_students
+          FROM
+              projects p
+          JOIN
+              project_students ps ON p.project_id = ps.project_id
+          GROUP BY
+              p.department_name;
+      `;
 
+      conn.query(sql, (err, results) => {
+          if (err) {
+              console.error('Error executing SQL query:', err);
+              return res.status(500).json({ error: 'Server error' });
+          }
 
+          const successRates = results.map(row => ({
+              department_name: row.department_name,
+              success_rate: (row.successful_students / row.total_students) * 100
+          }));
 
+          res.json(successRates);
+      });
+  } catch (error) {
+      console.error("Error calculating success rate by department:", error);
+      res.status(500).json({ error: "Server error" });
+  }
+});
 
 
 module.exports = router;  
