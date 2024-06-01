@@ -12,65 +12,64 @@ const unlinkAsync = promisify(fs.unlink);
 
 // Count project accepted
 router.get('/accepted-project-count', (req, res) => {
-    // Construct the SQL query to count the number of accepted projects
-    const sql = 'SELECT COUNT(*) AS acceptedProjectCount FROM projects WHERE approval_status = "Approved"';
-  
-    // Execute the query
-    conn.query(sql, (err, results) => {
-        if (err) {
-            console.error('Error executing SQL query:', err);
-            return res.status(500).json({ error: 'Server error' });
-        }
-        const acceptedProjectCount = results[0].acceptedProjectCount;
-        res.json({ acceptedProjectCount });
-    });
-  });
+  // Construct the SQL query to count the number of accepted projects
+  const sql = 'SELECT COUNT(*) AS acceptedProjectCount FROM projects WHERE approval_status = "Approved"';
 
+  // Execute the query
+  conn.query(sql, (err, results) => {
+    if (err) {
+      console.error('Error executing SQL query:', err);
+      return res.status(500).json({ error: 'Server error' });
+    }
+    const acceptedProjectCount = results[0].acceptedProjectCount;
+    res.json({ acceptedProjectCount });
+  });
+});
 
 // Count professors
 router.get('/count-professors', (req, res) => {
-    // Construct SQL query to count professors
-    const sql = 'SELECT COUNT(*) AS professorCount FROM professor';
-  
-    // Execute the query
-    conn.query(sql, (err, result) => {
-      if (err) {
-        console.error('Error executing SQL query:', err);
-        return res.status(500).json({ error: 'Server error' });
-      }
-  
-      // Extract the count from the result
-      const professorCount = result[0].professorCount;
-  
-      // Send the count as a response
-      res.json({ professorCount });
-    });
+  // Construct SQL query to count professors
+  const sql = 'SELECT COUNT(*) AS professorCount FROM professor';
+
+  // Execute the query
+  conn.query(sql, (err, result) => {
+    if (err) {
+      console.error('Error executing SQL query:', err);
+      return res.status(500).json({ error: 'Server error' });
+    }
+
+    // Extract the count from the result
+    const professorCount = result[0].professorCount;
+
+    // Send the count as a response
+    res.json({ professorCount });
   });
-  
+});
+
 // Count department
 router.get('/department-count', (req, res) => {
-    // Query to fetch the enum values from the department_name column
-    const query = "SELECT COLUMN_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'projects' AND COLUMN_NAME = 'department_name'";
-    conn.query(query, (err, result) => {
-        if (err) {
-            console.error('Error executing SQL query:', err);
-            return res.status(500).json({ error: 'Server error' });
-        }
+  // Query to fetch the enum values from the department_name column
+  const query = "SELECT COLUMN_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'projects' AND COLUMN_NAME = 'department_name'";
+  conn.query(query, (err, result) => {
+    if (err) {
+      console.error('Error executing SQL query:', err);
+      return res.status(500).json({ error: 'Server error' });
+    }
 
-        if (result.length === 0) {
-            return res.status(404).json({ error: 'Column not found' });
-        }
+    if (result.length === 0) {
+      return res.status(404).json({ error: 'Column not found' });
+    }
 
-        const enumValues = result[0].COLUMN_TYPE.match(/'[^']+'/g);
-        const departmentCount = enumValues ? enumValues.length : 0;
+    const enumValues = result[0].COLUMN_TYPE.match(/'[^']+'/g);
+    const departmentCount = enumValues ? enumValues.length : 0;
 
-        res.json({ count: departmentCount });
-    });
+    res.json({ count: departmentCount });
+  });
 });
 
 router.get('/professor-project-count/:professor_id', (req, res) => {
   const professorId = req.params.professor_id;
-  
+
   // Construct the SQL query to count the projects for the specific professor
   const sql = `
       SELECT 
@@ -81,15 +80,15 @@ router.get('/professor-project-count/:professor_id', (req, res) => {
       FROM projects 
       WHERE professor_id = ?
   `;
-  
+
   // Execute the query
   conn.query(sql, [professorId], (err, result) => {
-      if (err) {
-          console.error('Error executing SQL query:', err);
-          return res.status(500).json({ error: 'Server error' });
-      }
-      const { totalProjects, acceptedProjects, rejectedProjects, pendingProjects } = result[0];
-      res.json({ totalProjects, acceptedProjects, rejectedProjects, pendingProjects });
+    if (err) {
+      console.error('Error executing SQL query:', err);
+      return res.status(500).json({ error: 'Server error' });
+    }
+    const { totalProjects, acceptedProjects, rejectedProjects, pendingProjects } = result[0];
+    res.json({ totalProjects, acceptedProjects, rejectedProjects, pendingProjects });
   });
 });
 
@@ -159,11 +158,10 @@ router.get('/most-bookmarked-projects', async (req, res) => {
   }
 });
 
-
 //average grade for department
 router.get('/average-grades-by-department', async (req, res) => {
   try {
-      const sql = `
+    const sql = `
           SELECT 
               p.department_name,
               AVG(ps.semester_work_grade) AS avg_semester_work_grade,
@@ -177,16 +175,16 @@ router.get('/average-grades-by-department', async (req, res) => {
               p.department_name;
       `;
 
-      conn.query(sql, (err, results) => {
-          if (err) {
-              console.error('Error executing SQL query:', err);
-              return res.status(500).json({ error: 'Server error' });
-          }
-          res.json(results);
-      });
+    conn.query(sql, (err, results) => {
+      if (err) {
+        console.error('Error executing SQL query:', err);
+        return res.status(500).json({ error: 'Server error' });
+      }
+      res.json(results);
+    });
   } catch (error) {
-      console.error('Error:', error);
-      res.status(500).json({ error: 'Server error' });
+    console.error('Error:', error);
+    res.status(500).json({ error: 'Server error' });
   }
 });
 
@@ -222,39 +220,150 @@ router.get('/most-voted-projects', (req, res) => {
   const sql = 'SELECT title, total_votes FROM projects ORDER BY total_votes DESC LIMIT 3';
 
   conn.query(sql, (err, results) => {
-      if (err) {
-          console.error('Error executing SQL query:', err);
-          return res.status(500).json({ error: 'Server error' });
-      }
-      res.json(results);
+    if (err) {
+      console.error('Error executing SQL query:', err);
+      return res.status(500).json({ error: 'Server error' });
+    }
+    res.json(results);
   });
 });
-
 
 // the top 3 commented projects
 router.get('/most-commented-projects', async (req, res) => {
   try {
-      const sql = `
+    const sql = `
           SELECT p.title, COUNT(c.comment_id) AS comment_count
           FROM projects p
           LEFT JOIN comments c ON p.project_id = c.project_id
           GROUP BY p.title
           ORDER BY comment_count DESC
           LIMIT 3`;
-      
-      conn.query(sql, (err, results) => {
-          if (err) {
-              console.error('Error executing SQL query:', err);
-              return res.status(500).json({ error: 'Server error' });
-          }
-          res.json(results);
-      });
+
+    conn.query(sql, (err, results) => {
+      if (err) {
+        console.error('Error executing SQL query:', err);
+        return res.status(500).json({ error: 'Server error' });
+      }
+      res.json(results);
+    });
   } catch (error) {
-      console.error("Error calculating most commented projects:", error);
-      res.status(500).json({ error: "Server error" });
+    console.error("Error calculating most commented projects:", error);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+// Get average grades by year for each department
+router.get('/average-grades-by-year', async (req, res) => {
+  try {
+    const sql = `
+    SELECT 
+    p.department_name,
+    p.graduation_year AS year,
+    AVG(ps.semester_work_grade) AS avg_semester_work_grade,
+    AVG(ps.final_work_grade) AS avg_final_work_grade,
+    AVG((ps.semester_work_grade + ps.final_work_grade) / 2) AS avg_overall_grade
+FROM 
+    projects p
+JOIN 
+    project_students ps ON p.project_id = ps.project_id
+WHERE 
+    ps.semester_work_grade IS NOT NULL
+    AND ps.final_work_grade IS NOT NULL
+    AND p.graduation_year IS NOT NULL
+GROUP BY 
+    p.department_name, p.graduation_year
+ORDER BY 
+    p.department_name, p.graduation_year;
+`;
+
+    conn.query(sql, (err, results) => {
+      if (err) {
+        console.error('Error executing SQL query:', err);
+        return res.status(500).json({ error: 'Server error' });
+      }
+      res.json(results);
+    });
+  } catch (error) {
+    console.error('Error:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// Get average grades by graduation year
+router.get('/average-grades-by-graduation-year', async (req, res) => {
+  try {
+    const sql = `
+      SELECT 
+        p.graduation_year AS year,
+        AVG(ps.semester_work_grade) AS avg_semester_work_grade,
+        AVG(ps.final_work_grade) AS avg_final_work_grade,
+        AVG((ps.semester_work_grade + ps.final_work_grade) / 2) AS avg_overall_grade
+      FROM 
+        project_students ps
+      JOIN 
+        projects p ON ps.project_id = p.project_id
+      WHERE 
+        ps.semester_work_grade IS NOT NULL
+        AND ps.final_work_grade IS NOT NULL
+        AND p.graduation_year IS NOT NULL
+      GROUP BY 
+        p.graduation_year
+      ORDER BY 
+        p.graduation_year
+    `;
+
+    conn.query(sql, (err, results) => {
+      if (err) {
+        console.error('Error executing SQL query:', err);
+        return res.status(500).json({ error: 'Server error' });
+      }
+      res.json(results);
+    });
+  } catch (error) {
+    console.error('Error:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// Get average grades by graduation term
+router.get('/average-grades-by-graduation-term', async (req, res) => {
+  try {
+    const sql = `
+      SELECT 
+        p.graduation_term AS term,
+        AVG(ps.semester_work_grade) AS avg_semester_work_grade,
+        AVG(ps.final_work_grade) AS avg_final_work_grade,
+        AVG((ps.semester_work_grade + ps.final_work_grade) / 2) AS avg_overall_grade
+      FROM 
+        project_students ps
+      JOIN 
+        projects p ON ps.project_id = p.project_id
+      WHERE 
+        ps.semester_work_grade IS NOT NULL
+        AND ps.final_work_grade IS NOT NULL
+        AND p.graduation_term IN ('June', 'January', 'Summer')
+      GROUP BY 
+        term
+      ORDER BY 
+        term
+    `;
+
+    conn.query(sql, (err, results) => {
+      if (err) {
+        console.error('Error executing SQL query:', err);
+        return res.status(500).json({ error: 'Server error' });
+      }
+      res.json(results);
+    });
+  } catch (error) {
+    console.error('Error:', error);
+    res.status(500).json({ error: 'Server error' });
   }
 });
 
 
 
-  module.exports = router;  
+
+
+
+module.exports = router;  
