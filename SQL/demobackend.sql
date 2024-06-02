@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 07, 2024 at 03:30 PM
+-- Generation Time: Jun 02, 2024 at 07:22 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -34,6 +34,14 @@ CREATE TABLE `admin` (
   `admin_password` varchar(255) NOT NULL,
   `admin_token` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `admin`
+--
+
+INSERT INTO `admin` (`admin_id`, `admin_name`, `admin_email`, `admin_password`, `admin_token`) VALUES
+(1, 'Admin', 'admin@fci.helwan.edu.eg', 'Admin', '30245e04e42ecb9361e314c8d5bce275'),
+(4, 'Admin', 'admin1@fci.helwan.edu.eg', '$2b$10$1c0pV927qvVwgq4zZ02vgeN/SD1mdYT4sLnjOZxf/O2HBlvKgeLeW', 'cfc5ffff9bbf88fb74fc093598c65383');
 
 -- --------------------------------------------------------
 
@@ -89,6 +97,23 @@ INSERT INTO `comments` (`comment_id`, `project_id`, `commenter_id`, `comment_tex
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `notifications`
+--
+
+CREATE TABLE `notifications` (
+  `notification_id` int(11) NOT NULL,
+  `recipient_id` int(11) DEFAULT NULL,
+  `sender_id` int(11) DEFAULT NULL,
+  `notification_type` enum('vote','comment','project_request','project_status_update','grade_update') NOT NULL,
+  `project_id` int(11) NOT NULL,
+  `read_status` enum('unread','read') NOT NULL DEFAULT 'unread',
+  `notification_message` text NOT NULL,
+  `timestamp` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `professor`
 --
 
@@ -98,17 +123,19 @@ CREATE TABLE `professor` (
   `professor_email` varchar(255) NOT NULL,
   `professor_password` varchar(255) NOT NULL,
   `professor_department` varchar(255) NOT NULL,
-  `professor_token` varchar(255) NOT NULL
+  `professor_token` varchar(255) NOT NULL,
+  `reset_password_token` varchar(255) DEFAULT NULL,
+  `reset_password_expires` bigint(20) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `professor`
 --
 
-INSERT INTO `professor` (`professor_id`, `professor_name`, `professor_email`, `professor_password`, `professor_department`, `professor_token`) VALUES
-(809000586, 'Abdelrahman', 'Ebnelnas@fci.helwan.edu.eg', '$2b$10$MrR3dXPx.cDt4A2rnf0NA.S9ACnNqVkZED5tCFgmM8tGu1e2CHUq6', 'cs', 'b977b6c231f130f19df2aa0bc109f1bc'),
-(202000496, 'Hany Abdelrazek', 'hanyhany@fci.helwan.edu.eg', '$2b$10$Xpqq1qOtAtFB760uVb7inuF8Az09xDhXUUW5FN7t6TJlNvT5nTpvu', 'is', '1090d36f6a263870b47346abca52750d'),
-(20200, 'Abdelrahman ahmed', 'abdo.ahmed@fci.helwan.edu.eg', '$2b$10$Y3H.JKJmOQXiew5hsmbXpuwrfqFAbpBVfelKJYOwFA0T0j2aRKF1W', 'Computer Science', 'a566e7d37112a792a736c2427bc52ba9');
+INSERT INTO `professor` (`professor_id`, `professor_name`, `professor_email`, `professor_password`, `professor_department`, `professor_token`, `reset_password_token`, `reset_password_expires`) VALUES
+(809000586, 'Abdelrahman', 'Ebnelnas@fci.helwan.edu.eg', '$2b$10$a.pB3OEu/PHOoeBGgZmawOH7T9gomGVIZBNOgnqjaIYURZs0wqBxe', 'cs', 'b977b6c231f130f19df2aa0bc109f1bc', NULL, NULL),
+(202000496, 'Hany Abdelrazek', 'hanyhany@fci.helwan.edu.eg', '$2b$10$Xpqq1qOtAtFB760uVb7inuF8Az09xDhXUUW5FN7t6TJlNvT5nTpvu', 'is', '1090d36f6a263870b47346abca52750d', NULL, NULL),
+(20200, 'Abdelrahman ahmed', 'abdo0o00.ahmed@fci.helwan.edu.eg', '$2b$10$hRL/SnKx1d5s67xQnEpS0eT7bgtIUVGg4b9DGiDfPqmWfVjYZ5R.W', 'Computer Science', '9daec50ca8ca7806ea4ace97d3c42f2b', NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -137,22 +164,22 @@ CREATE TABLE `projects` (
 --
 
 INSERT INTO `projects` (`project_id`, `title`, `description`, `supervisor_name`, `graduation_year`, `graduation_term`, `department_name`, `project_files_path`, `github_link`, `approval_status`, `total_votes`, `professor_id`, `registration_date`) VALUES
-(1, 'ay klam', 'hello', 'mar3333eeeeeeeeeeee', 2024, '', '', NULL, 'ay 7aga', 'Approved', 6, NULL, '2024-05-06'),
-(2, 'Project Title123', 'gthgtughurrreuifhfhhfj', 'Supervisor Name', 2024, '', '', NULL, 'https://github.com/example/project', 'Rejected', 1, NULL, NULL),
-(3, 'hamadahamada', 'hamadahamada', 'hamadahamada', 2027, '', '', NULL, 'hamada.com/github_link ', 'Pending', 0, NULL, NULL),
-(4, 'GPMS', 'kter', 'DR MAray', 2024, '', '', 'project_files\\1714685518174.rar', 'hamada.com/github_link ', 'Pending', 0, NULL, NULL),
-(5, 'hamadahamada1333', 'hamadahamada', 'hamadahamada111', 3333, '', '', NULL, 'hamada.com/github_link ', 'Pending', 0, NULL, NULL),
-(28, 'ay klam', 'hello', 'mar3333eeeeeeeeeeee', 2024, '', '', NULL, 'ay 7aga', 'Pending', 0, NULL, NULL),
-(29, 'ay klam faaaddy', 'hedddd', 'manaaaaal', 2025, '', '', NULL, 'ta3ban', 'Pending', 0, NULL, NULL),
-(30, 'ay klam faaaddy', 'hedddd', 'manaaaaal', 2025, '', '', NULL, 'ta3ban', 'Approved', 0, NULL, NULL),
-(31, 'ay klam faaaddy', 'hedddd', 'manaaaaal', 2025, '', '', NULL, 'ta3ban', 'Approved', 0, NULL, '2024-05-05'),
-(32, 'ay klam faaaddy', 'hedddd', 'manaaaaal', 2025, '', '', NULL, 'ta3ban', 'Pending', 0, NULL, NULL),
-(33, 'ay klam faaaddy', 'hedddd', 'manaaaaal', 2025, '', '', NULL, 'ta3ban', 'Pending', 0, 809000586, NULL),
-(34, 'Sample Project', 'This is a sample project description', 'Mohamed Maray', 2024, '', '', 'project_files\\1715007907218.png', 'https://github.com/sample/project', 'Pending', 0, 809000586, NULL),
-(35, 'ay klam faaaddy', 'hedddd', 'manaaaaal', 2025, 'Summer', '', NULL, 'ta3ban', 'Pending', 0, NULL, NULL),
-(36, 'ay klam faaaddy', 'hedddd', 'manaaaaal', 2025, 'Summer', 'Computer Science', NULL, 'ta3ban', 'Pending', 0, NULL, NULL),
-(37, 'zain', 'hamadahamada', 'Maray', 2024, 'June', 'Information Systems', 'project_files\\1715050231688.png', 'zain.com', 'Pending', 0, 20200, NULL),
-(38, 'zain', 'zain bardo', 'Maray', 2024, 'June', 'Information Systems', 'project_files\\1715050538588.png', 'zain.com', 'Pending', 0, 20200, NULL);
+(1, 'ay klam', 'hello', 'mar3333eeeeeeeeeeee', 2023, 'June', 'Information Systems', NULL, 'ay 7aga', 'Approved', 6, NULL, '2024-05-06'),
+(2, 'Project Title123', 'gthgtughurrreuifhfhhfj', 'Supervisor Name', 2024, 'June', 'Information Technology', NULL, 'https://github.com/example/project', 'Rejected', 1, NULL, NULL),
+(3, 'hamadahamada', 'hamadahamada', 'hamadahamada', 2022, 'June', 'Artificial Intelligence', NULL, 'hamada.com/github_link ', 'Pending', 0, NULL, NULL),
+(4, 'GPMS', 'kter', 'DR MAray', 2021, 'Summer', 'Information Systems', 'project_files\\1714685518174.rar', 'hamada.com/github_link ', 'Pending', 0, NULL, NULL),
+(5, 'hamadahamada1333', 'hamadahamada', 'hamadahamada111', 2023, 'January', 'Computer Science', NULL, 'hamada.com/github_link ', 'Pending', 0, NULL, NULL),
+(28, 'ay klam', 'hello', 'mar3333eeeeeeeeeeee', 2024, 'January', 'Computer Science', NULL, 'ay 7aga', 'Pending', 0, NULL, NULL),
+(29, 'ay klam faaaddy', 'hedddd', 'manaaaaal', 2025, 'Summer', 'Information Systems', NULL, 'ta3ban', 'Pending', 0, NULL, NULL),
+(30, 'ay klam faaaddy', 'hedddd', 'manaaaaal', 2021, 'June', 'Information Systems', NULL, 'ta3ban', 'Approved', 0, NULL, NULL),
+(31, 'ay klam faaaddy', 'hedddd', 'manaaaaal', 2021, 'January', 'Information Systems', NULL, 'ta3ban', 'Approved', 0, NULL, '2024-05-05'),
+(32, 'ay klam faaaddy', 'hedddd', 'manaaaaal', 2023, 'Summer', 'Computer Science', NULL, 'ta3ban', 'Pending', 0, NULL, NULL),
+(33, 'ay klam faaaddy', 'hedddd', 'manaaaaal', 2024, 'January', 'Information Systems', NULL, 'ta3ban', 'Pending', 0, 809000586, NULL),
+(34, 'Sample Project', 'This is a sample project description', 'Mohamed Maray', 2022, 'January', 'Information Technology', 'project_files\\1715007907218.png', 'https://github.com/sample/project', 'Pending', 0, 809000586, NULL),
+(35, 'ay klam faaaddy', 'hedddd', 'manaaaaal', 2022, 'Summer', 'Artificial Intelligence', NULL, 'ta3ban', 'Pending', 0, NULL, NULL),
+(36, 'ay klam faaaddy', 'hedddd', 'manaaaaal', 2023, 'Summer', 'Computer Science', NULL, 'ta3ban', 'Pending', 0, NULL, NULL),
+(37, 'zain', 'zain', 'Maray', 2024, 'June', 'Information Systems', 'project_files\\1715094311267.rar', 'zain.com', 'Pending', 0, 20200, NULL),
+(38, 'zain', 'zain bardo', 'Maray', 2025, 'June', 'Information Systems', 'project_files\\1715050538588.png', 'zain.com', 'Pending', 0, 20200, NULL);
 
 -- --------------------------------------------------------
 
@@ -262,24 +289,26 @@ CREATE TABLE `students` (
   `student_email` varchar(255) NOT NULL,
   `student_password` varchar(255) NOT NULL,
   `student_department` varchar(255) DEFAULT NULL,
-  `student_token` varchar(255) NOT NULL DEFAULT 'hello'
+  `student_token` varchar(255) NOT NULL DEFAULT 'hello',
+  `reset_password_token` varchar(255) DEFAULT NULL,
+  `reset_password_expires` bigint(20) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `students`
 --
 
-INSERT INTO `students` (`student_id`, `student_name`, `student_email`, `student_password`, `student_department`, `student_token`) VALUES
-(0, 'Mohamed zain', 'john.doe@fci.helwan.edu.eg', '$2b$10$wkVr6uuRfdajrSQ07t/OAuOBwn8exc0847FDEWKq4Y0iX/bQhf58S', '', 'd5fde16db6375adc6687a3beb23588e6'),
-(7, 'Mohamed Zain', 'Mohamed_Zain@fci.helwan.edu.eg', '$2b$10$HboC7yQbxbNbfNAGhnrif.n0H/0Br6xw1bORhSzRUYqPlSk.vQYwG', NULL, '64fa3d60ebb4be5d98e65ac11b129971'),
-(8, 'Mohamed Ahmed', 'Mohamed_Ahmed@fci.helwan.edu.eg', '$2b$10$h3qVOArAI..W4ZdIDvH6/uyBXKMGPq9khAOrio.TrTye5UH1M48i6', NULL, '6ef85404ec5c8b999f5f703584379e37'),
-(9, 'admin admin', 'admin@fci.helwan.edu.eg', '$2b$10$Rrz45r/CQ1JT3P9H12MYMOYcNMZJb2UDp3g7mxELtvWvtJpxntdBy', NULL, ''),
-(10, 'admin hello', 'helllllllll@fci.helwan.edu.eg', '$2b$10$2imy8DN1H3vZ9vGdzjjDwepImLKKZ/sxbulWUmXEzQ7cJdm.JzM3q', NULL, ''),
-(11, 'admin hello', 'youyou@fci.helwan.edu.eg', '$2b$10$k3anRZtkhnlQmDhDSOk7SOX3aAKrItRbYbqbptMcWdeD7ZRGeemA6', NULL, ''),
-(202000245, 'Hazem hamdy', 'hazem@fci.helwan.edu.eg', '$2b$10$.wt2iATEk/59LHhiQEouOeOSGXapJTmfbLVDIVojzg6naWmY85aKi', 'Software Engineering', '79673a812778cc0556aaa47818ce0bb4'),
-(202000760, '’Mohamed Zain', 'Mohamedzain235@fci.helwan.edu.eg', '$2b$10$.2axmfsaKj2EcgKFbnGqv.uhfu8FPJWmIWAEkk3NWcBufhaK8IBla', 'Information systems', 'f940a7a81f9a45bfd8f0dc715b6c8e70'),
-(202000761, 'Mohamed Zain', 'jon@fci.helwan.edu.eg', '$2b$10$vlsDivDwlWUXlpuoZ121p.3HuvqNDWhdo3DlmNv.VoXhFB/0qKPv6', 'Software Engineering', '86ac195bf92d16376e870b0f638866f4'),
-(202000762, 'Mohamed Zain', 'john@fci.helwan.edu.eg', '$2b$10$65z7DgiOmWHGz1ycemwniOmnAvIN6z409A6Hl0y2g.u855vpod6mm', 'Software Engineering', '17314c1288b5441d770c7e2c3ffa396d');
+INSERT INTO `students` (`student_id`, `student_name`, `student_email`, `student_password`, `student_department`, `student_token`, `reset_password_token`, `reset_password_expires`) VALUES
+(0, 'Mohamed zain', 'john.doe@fci.helwan.edu.eg', '$2b$10$wkVr6uuRfdajrSQ07t/OAuOBwn8exc0847FDEWKq4Y0iX/bQhf58S', '', 'd5fde16db6375adc6687a3beb23588e6', NULL, NULL),
+(7, 'Mohamed Zain', 'Mohamed_Zain@fci.helwan.edu.eg', '$2b$10$HboC7yQbxbNbfNAGhnrif.n0H/0Br6xw1bORhSzRUYqPlSk.vQYwG', NULL, '64fa3d60ebb4be5d98e65ac11b129971', NULL, NULL),
+(8, 'Mohamed Ahmed', 'Mohamed_Ahmed@fci.helwan.edu.eg', '$2b$10$h3qVOArAI..W4ZdIDvH6/uyBXKMGPq9khAOrio.TrTye5UH1M48i6', NULL, '6ef85404ec5c8b999f5f703584379e37', NULL, NULL),
+(9, 'admin admin', 'admin@fci.helwan.edu.eg', '$2b$10$Rrz45r/CQ1JT3P9H12MYMOYcNMZJb2UDp3g7mxELtvWvtJpxntdBy', NULL, '', NULL, NULL),
+(10, 'admin hello', 'helllllllll@fci.helwan.edu.eg', '$2b$10$2imy8DN1H3vZ9vGdzjjDwepImLKKZ/sxbulWUmXEzQ7cJdm.JzM3q', NULL, '', NULL, NULL),
+(11, 'admin hello', 'youyou@fci.helwan.edu.eg', '$2b$10$k3anRZtkhnlQmDhDSOk7SOX3aAKrItRbYbqbptMcWdeD7ZRGeemA6', NULL, '', NULL, NULL),
+(202000245, 'Hazem hamdy', 'hazem@fci.helwan.edu.eg', '$2b$10$.wt2iATEk/59LHhiQEouOeOSGXapJTmfbLVDIVojzg6naWmY85aKi', 'Software Engineering', '79673a812778cc0556aaa47818ce0bb4', NULL, NULL),
+(202000760, '’Mohamed Zain', 'Mohamedzain235@fci.helwan.edu.eg', '$2b$10$.2axmfsaKj2EcgKFbnGqv.uhfu8FPJWmIWAEkk3NWcBufhaK8IBla', 'Information systems', 'f940a7a81f9a45bfd8f0dc715b6c8e70', NULL, NULL),
+(202000761, 'Mohamed Zain', 'jon@fci.helwan.edu.eg', '$2b$10$vlsDivDwlWUXlpuoZ121p.3HuvqNDWhdo3DlmNv.VoXhFB/0qKPv6', 'Software Engineering', 'e210490bdddfb37828ec7a9e8b8604cd', NULL, NULL),
+(202000762, 'Mohamed Zain', 'Mohamedzain1122355@fci.helwan.edu.eg', '$2b$10$Dllk9xz7/7N1QO.6eb9Z0uNfNAwb/gp4pjvRYWsFy/BKKfMU32EaG', 'Software Engineering', '3c3a2bab1983d7f9272975c8ae891c4e', NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -329,6 +358,12 @@ ALTER TABLE `comments`
   ADD KEY `commenter_id` (`commenter_id`);
 
 --
+-- Indexes for table `notifications`
+--
+ALTER TABLE `notifications`
+  ADD PRIMARY KEY (`notification_id`);
+
+--
 -- Indexes for table `professor`
 --
 ALTER TABLE `professor`
@@ -373,7 +408,7 @@ ALTER TABLE `votes`
 -- AUTO_INCREMENT for table `admin`
 --
 ALTER TABLE `admin`
-  MODIFY `admin_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `admin_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `bookmarks`
@@ -386,6 +421,12 @@ ALTER TABLE `bookmarks`
 --
 ALTER TABLE `comments`
   MODIFY `comment_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
+
+--
+-- AUTO_INCREMENT for table `notifications`
+--
+ALTER TABLE `notifications`
+  MODIFY `notification_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=42;
 
 --
 -- AUTO_INCREMENT for table `projects`
