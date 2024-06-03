@@ -397,5 +397,39 @@ router.get('/success-rate-by-department', async (req, res) => {
   }
 });
 
+router.get('/failure-rate-by-department', async (req, res) => {
+  try {
+    const sql = `
+      SELECT
+        p.department_name,
+        COUNT(ps.student_id) AS total_students,
+        SUM(CASE WHEN ps.overall_grade < (ps.max_overall_grade / 2) THEN 1 ELSE 0 END) AS failed_students
+      FROM
+        projects p
+      JOIN
+        project_students ps ON p.project_id = ps.project_id
+      GROUP BY
+        p.department_name;
+    `;
+
+    conn.query(sql, (err, results) => {
+      if (err) {
+        console.error('Error executing SQL query:', err);
+        return res.status(500).json({ error: 'Server error' });
+      }
+
+      const failureRates = results.map(row => ({
+        department_name: row.department_name,
+        failure_rate: (row.failed_students / row.total_students) * 100
+      }));
+
+      res.json(failureRates);
+    });
+  } catch (error) {
+    console.error("Error calculating failure rate by department:", error);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
 
 module.exports = router;  
