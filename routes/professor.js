@@ -332,7 +332,7 @@ router.put(
   }
 );
 
-// Assign grades to students (DONE)
+// Assigned grades to students (DONE)
 router.get("/project/:project_id/students", async (req, res) => {
   try {
     const { project_id } = req.params;

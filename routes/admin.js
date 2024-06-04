@@ -432,7 +432,7 @@ router.get("/show-term", (req, res) => {
       if (err) {
         return res
           .status(500)
-          .json({ error: "Error retrieving department names" });
+          .json({ error: "Error retrieving graduation term" });
       }
 
       // Extract current options from the database result and filter out empty strings
@@ -440,10 +440,9 @@ router.get("/show-term", (req, res) => {
         .map((option) => option.replace(/'/g, ""))
         .filter((option) => option !== "");
 
-      return res.status(200).json({ department_names: currentOptions });
+      return res.status(200).json({ graduation_term: currentOptions });
     }
   );
 });
-
 
 module.exports = router;
