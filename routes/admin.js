@@ -445,4 +445,18 @@ router.get("/show-term", (req, res) => {
   );
 });
 
+//GET ALL STUDENTS
+router.get("/students", (req, res) => {
+  conn.query(
+    "SELECT student_id, student_name FROM Students",
+    (err, results) => {
+      if (err) {
+        res.status(500).json({ error: "Error fetching student accounts" });
+      } else {
+        res.status(200).json(results);
+      }
+    }
+  );
+});
+
 module.exports = router;
