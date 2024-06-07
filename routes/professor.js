@@ -332,7 +332,7 @@ router.put(
   }
 );
 
-// Assigned grades to students (DONE)
+// Assign grades to students (DONE)
 router.get("/project/:project_id/students", async (req, res) => {
   try {
     const { project_id } = req.params;
@@ -612,16 +612,13 @@ router.put(
     }
   }
 );
-
-
-// Request Password Reset for Professor
 router.post(
-  '/request-professor-password-reset',
-  body('email')
+  "/request-professor-password-reset",
+  body("email")
     .isEmail()
-    .withMessage('Please enter a valid email!')
+    .withMessage("Please enter a valid email!")
     .custom((value) => {
-      if (!value.endsWith('@fci.helwan.edu.eg')) {
+      if (!value.endsWith("@fci.helwan.edu.eg")) {
         throw new Error("Email domain must be '@fci.helwan.edu.eg'");
       }
       return true;
@@ -637,33 +634,46 @@ router.post(
       const email = req.body.email;
 
       // Check if email exists in the database
-      const professor = await query('SELECT * FROM professor WHERE professor_email = ?', [email]);
+      const professor = await query(
+        "SELECT * FROM professor WHERE professor_email = ?",
+        [email]
+      );
       if (professor.length === 0) {
-        return res.status(404).json({ error: 'No account found with that email address.' });
+        return res
+          .status(404)
+          .json({ error: "No account found with that email address." });
       }
 
       // Generate a password reset token
-      const resetToken = crypto.randomBytes(20).toString('hex');
+      const resetToken = crypto.randomBytes(20).toString("hex");
       const resetTokenExpiration = Date.now() + 3600000; // 1 hour from now
 
       // Store the token in the database
-      await query('UPDATE professor SET reset_password_token = ?, reset_password_expires = ? WHERE professor_email = ?', [resetToken, resetTokenExpiration, email]);
+      await query(
+        "UPDATE professor SET reset_password_token = ?, reset_password_expires = ? WHERE professor_email = ?",
+        [resetToken, resetTokenExpiration, email]
+      );
 
       // Instead of sending an email, we return the token in the response for testing
-      res.status(200).json({ message: 'Password reset token generated successfully!', resetToken });
+      res
+        .status(200)
+        .json({
+          message: "Password reset token generated successfully!",
+          resetToken,
+        });
     } catch (err) {
-      console.error('Error requesting password reset:', err);
-      res.status(500).json({ error: 'Server error' });
+      console.error("Error requesting password reset:", err);
+      res.status(500).json({ error: "Server error" });
     }
   }
 );
 
 // Reset Password for Professor
 router.post(
-  '/reset-professor-password/:token',
-  body('password')
+  "/reset-professor-password/:token",
+  body("password")
     .isLength({ min: 8, max: 12 })
-    .withMessage('Password should be between 8 to 12 characters'),
+    .withMessage("Password should be between 8 to 12 characters"),
   async (req, res) => {
     try {
       const errors = validationResult(req);
@@ -676,21 +686,31 @@ router.post(
       const newPassword = req.body.password;
 
       // Find the professor by the reset token and check if the token is still valid
-      const professor = await query('SELECT * FROM professor WHERE reset_password_token = ? AND reset_password_expires > ?', [resetToken, Date.now()]);
+      const professor = await query(
+        "SELECT * FROM professor WHERE reset_password_token = ? AND reset_password_expires > ?",
+        [resetToken, Date.now()]
+      );
       if (professor.length === 0) {
-        return res.status(400).json({ error: 'Password reset token is invalid or has expired.' });
+        return res
+          .status(400)
+          .json({ error: "Password reset token is invalid or has expired." });
       }
 
       // Hash the new password
       const hashedPassword = await bcrypt.hash(newPassword, 10);
 
       // Update the professor's password and clear the reset token and expiration
-      await query('UPDATE professor SET professor_password = ?, reset_password_token = NULL, reset_password_expires = NULL WHERE reset_password_token = ?', [hashedPassword, resetToken]);
+      await query(
+        "UPDATE professor SET professor_password = ?, reset_password_token = NULL, reset_password_expires = NULL WHERE reset_password_token = ?",
+        [hashedPassword, resetToken]
+      );
 
-      res.status(200).json({ message: 'Password has been reset successfully!' });
+      res
+        .status(200)
+        .json({ message: "Password has been reset successfully!" });
     } catch (err) {
-      console.error('Error resetting password:', err);
-      res.status(500).json({ error: 'Server error' });
+      console.error("Error resetting password:", err);
+      res.status(500).json({ error: "Server error" });
     }
   }
 );

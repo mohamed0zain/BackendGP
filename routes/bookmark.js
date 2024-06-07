@@ -69,7 +69,6 @@ function removeBookmark(student_id, project_id) {
 }
 
 
-
 // Function to get project details
 
 function getProjectDetails(project_id) {

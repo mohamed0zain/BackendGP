@@ -75,7 +75,7 @@ router.get('/professor-project-count/:professor_id', (req, res) => {
   const sql = `
       SELECT 
           COUNT(*) AS totalProjects,
-          SUM(CASE WHEN approval_status = 'Accepted' THEN 1 ELSE 0 END) AS acceptedProjects,
+          SUM(CASE WHEN approval_status = 'Approved' THEN 1 ELSE 0 END) AS acceptedProjects,
           SUM(CASE WHEN approval_status = 'Rejected' THEN 1 ELSE 0 END) AS rejectedProjects,
           SUM(CASE WHEN approval_status = 'Pending' THEN 1 ELSE 0 END) AS pendingProjects
       FROM projects 
@@ -190,29 +190,37 @@ router.get('/average-grades-by-department', async (req, res) => {
 });
 
 //average grade for professer
-router.get('/average-grade-by-professor', async (req, res) => {
+router.get("/average-grade-by-professor", async (req, res) => {
   try {
-    const sql = `
-      SELECT 
-        pp.professor_id,
-        AVG(ps.overall_grade) AS average_grade
-      FROM 
-        project_professor pp
-      INNER JOIN 
-        project_students ps ON pp.project_id = ps.project_id
-      GROUP BY 
-        pp.professor_id
+    const sql = 
+    `SELECT 
+    pr.professor_name,
+    AVG(ps.overall_grade) AS avg_overall_grade
+FROM 
+    project_students ps
+JOIN 
+    projects p ON ps.project_id = p.project_id
+JOIN
+    project_professor pp ON pp.project_id = ps.project_id
+JOIN
+    professor pr ON pr.professor_id = pp.professor_id
+WHERE
+    ps.semester_work_grade IS NOT NULL
+    AND ps.final_work_grade IS NOT NULL
+    AND ps.overall_grade IS NOT NULL
+GROUP BY 
+    pr.professor_name;
     `;
     conn.query(sql, (err, results) => {
       if (err) {
-        console.error('Error executing SQL query:', err);
-        return res.status(500).json({ error: 'Server error' });
+        console.error("Error executing SQL query:", err);
+        return res.status(500).json({ error: "Server error" });
       }
       res.json(results);
     });
   } catch (error) {
-    console.error('Error calculating average grade by professor:', error);
-    res.status(500).json({ error: 'Server error' });
+    console.error("Error calculating average grade by professor:", error);
+    res.status(500).json({ error: "Server error" });
   }
 });
 
@@ -396,7 +404,7 @@ router.get('/success-rate-by-department', async (req, res) => {
       res.status(500).json({ error: "Server error" });
   }
 });
-
+//failure rate by department
 router.get('/failure-rate-by-department', async (req, res) => {
   try {
     const sql = `
