@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jun 02, 2024 at 07:22 PM
+-- Generation Time: Jun 07, 2024 at 04:52 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -41,7 +41,7 @@ CREATE TABLE `admin` (
 
 INSERT INTO `admin` (`admin_id`, `admin_name`, `admin_email`, `admin_password`, `admin_token`) VALUES
 (1, 'Admin', 'admin@fci.helwan.edu.eg', 'Admin', '30245e04e42ecb9361e314c8d5bce275'),
-(4, 'Admin', 'admin1@fci.helwan.edu.eg', '$2b$10$1c0pV927qvVwgq4zZ02vgeN/SD1mdYT4sLnjOZxf/O2HBlvKgeLeW', 'cfc5ffff9bbf88fb74fc093598c65383');
+(4, 'Admin', 'admin1@fci.helwan.edu.eg', '$2b$10$1c0pV927qvVwgq4zZ02vgeN/SD1mdYT4sLnjOZxf/O2HBlvKgeLeW', 'f703f7bc42efdd977a8dbabdc63e55be');
 
 -- --------------------------------------------------------
 
@@ -64,11 +64,7 @@ CREATE TABLE `bookmarks` (
 --
 
 INSERT INTO `bookmarks` (`bookmark_id`, `student_id`, `project_id`, `title`, `department_name`, `total_votes`, `bookmark_timestamp`) VALUES
-(2, 202000762, 4, 'GPMS', 'is', 0, '2024-05-03 22:34:43'),
-(3, 202000762, 3, 'hamadahamada', 'manal', 0, '2024-05-03 22:39:51'),
-(4, 202000761, 1, 'Ay haga', NULL, 4, '2024-05-04 10:50:07'),
-(7, 202000761, 1, 'ay klam', 'is', 6, '2024-05-06 15:41:43'),
-(12, 202000761, 4, 'GPMS', 'is', 0, '2024-05-06 16:36:17');
+(16, 202000762, 1, 'ay klam', 'Information Systems', 5, '2024-06-07 00:35:04');
 
 -- --------------------------------------------------------
 
@@ -111,6 +107,59 @@ CREATE TABLE `notifications` (
   `timestamp` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data for table `notifications`
+--
+
+INSERT INTO `notifications` (`notification_id`, `recipient_id`, `sender_id`, `notification_type`, `project_id`, `read_status`, `notification_message`, `timestamp`) VALUES
+(42, 202000762, 202000762, 'vote', 28, 'unread', 'User with id 202000762 has upvoted your project.', '2024-06-07 00:31:45'),
+(43, 202000210, 202000762, 'vote', 28, 'unread', 'User with id 202000762 has upvoted your project.', '2024-06-07 00:31:45'),
+(44, 202000752, 202000762, 'vote', 28, 'unread', 'User with id 202000762 has upvoted your project.', '2024-06-07 00:31:45'),
+(45, 202000762, 202000762, 'vote', 28, 'unread', 'User with id 202000762 has upvoted your project.', '2024-06-07 00:31:49'),
+(46, 202000210, 202000762, 'vote', 28, 'unread', 'User with id 202000762 has upvoted your project.', '2024-06-07 00:31:49'),
+(47, 202000752, 202000762, 'vote', 28, 'unread', 'User with id 202000762 has upvoted your project.', '2024-06-07 00:31:49'),
+(48, 202000999, 202000762, 'comment', 31, 'unread', 'User with id 202000762 has added a comment to your project.', '2024-06-07 00:32:12'),
+(49, 202000333, 202000762, 'comment', 31, 'unread', 'User with id 202000762 has added a comment to your project.', '2024-06-07 00:32:12'),
+(50, 202000555, 202000762, 'comment', 31, 'unread', 'User with id 202000762 has added a comment to your project.', '2024-06-07 00:32:12'),
+(51, 202100001, 202000762, 'vote', 1, 'unread', 'User with id 202000762 has upvoted your project.', '2024-06-07 00:32:37'),
+(52, 202100002, 202000762, 'vote', 1, 'unread', 'User with id 202000762 has upvoted your project.', '2024-06-07 00:32:37'),
+(53, 202100003, 202000762, 'vote', 1, 'unread', 'User with id 202000762 has upvoted your project.', '2024-06-07 00:32:37'),
+(54, 202000999, 202000762, 'vote', 31, 'unread', 'User with id 202000762 has upvoted your project.', '2024-06-07 00:32:42'),
+(55, 202000333, 202000762, 'vote', 31, 'unread', 'User with id 202000762 has upvoted your project.', '2024-06-07 00:32:42'),
+(56, 202000555, 202000762, 'vote', 31, 'unread', 'User with id 202000762 has upvoted your project.', '2024-06-07 00:32:42'),
+(57, 202000777, 202000762, 'vote', 30, 'unread', 'User with id 202000762 has upvoted your project.', '2024-06-07 00:32:43'),
+(58, 202000222, 202000762, 'vote', 30, 'unread', 'User with id 202000762 has upvoted your project.', '2024-06-07 00:32:43'),
+(59, 202000232, 202000762, 'vote', 30, 'unread', 'User with id 202000762 has upvoted your project.', '2024-06-07 00:32:43'),
+(60, 202100001, 202000762, 'vote', 1, 'unread', 'User with id 202000762 has upvoted your project.', '2024-06-07 00:32:45'),
+(61, 202100002, 202000762, 'vote', 1, 'unread', 'User with id 202000762 has upvoted your project.', '2024-06-07 00:32:45'),
+(62, 202100003, 202000762, 'vote', 1, 'unread', 'User with id 202000762 has upvoted your project.', '2024-06-07 00:32:45'),
+(63, 202100001, 202000762, 'vote', 1, 'unread', 'User with id 202000762 has upvoted your project.', '2024-06-07 00:34:35'),
+(64, 202100002, 202000762, 'vote', 1, 'unread', 'User with id 202000762 has upvoted your project.', '2024-06-07 00:34:35'),
+(65, 202100003, 202000762, 'vote', 1, 'unread', 'User with id 202000762 has upvoted your project.', '2024-06-07 00:34:35'),
+(66, 202100001, 202000762, 'vote', 1, 'unread', 'User with id 202000762 has upvoted your project.', '2024-06-07 00:34:37'),
+(67, 202100002, 202000762, 'vote', 1, 'unread', 'User with id 202000762 has upvoted your project.', '2024-06-07 00:34:37'),
+(68, 202100003, 202000762, 'vote', 1, 'unread', 'User with id 202000762 has upvoted your project.', '2024-06-07 00:34:37'),
+(69, 202100001, 202000762, 'vote', 1, 'unread', 'User with id 202000762 has upvoted your project.', '2024-06-07 00:34:38'),
+(70, 202100002, 202000762, 'vote', 1, 'unread', 'User with id 202000762 has upvoted your project.', '2024-06-07 00:34:38'),
+(71, 202100003, 202000762, 'vote', 1, 'unread', 'User with id 202000762 has upvoted your project.', '2024-06-07 00:34:38'),
+(72, 202100001, 202000762, 'vote', 1, 'unread', 'User with id 202000762 has upvoted your project.', '2024-06-07 00:34:38'),
+(73, 202100002, 202000762, 'vote', 1, 'unread', 'User with id 202000762 has upvoted your project.', '2024-06-07 00:34:38'),
+(74, 202100003, 202000762, 'vote', 1, 'unread', 'User with id 202000762 has upvoted your project.', '2024-06-07 00:34:38'),
+(75, 202100001, 202000762, 'comment', 1, 'unread', 'User with id 202000762 has added a comment to your project.', '2024-06-07 00:34:55'),
+(76, 202100002, 202000762, 'comment', 1, 'unread', 'User with id 202000762 has added a comment to your project.', '2024-06-07 00:34:56'),
+(77, 202100003, 202000762, 'comment', 1, 'unread', 'User with id 202000762 has added a comment to your project.', '2024-06-07 00:34:56'),
+(78, 202100001, 202000762, 'vote', 1, 'unread', 'User with id 202000762 has upvoted your project.', '2024-06-07 00:35:19'),
+(79, 202100002, 202000762, 'vote', 1, 'unread', 'User with id 202000762 has upvoted your project.', '2024-06-07 00:35:19'),
+(80, 202100003, 202000762, 'vote', 1, 'unread', 'User with id 202000762 has upvoted your project.', '2024-06-07 00:35:19'),
+(81, 202100001, 202000762, 'vote', 1, 'unread', 'User with id 202000762 has upvoted your project.', '2024-06-07 00:35:22'),
+(82, 202100002, 202000762, 'vote', 1, 'unread', 'User with id 202000762 has upvoted your project.', '2024-06-07 00:35:22'),
+(83, 202100003, 202000762, 'vote', 1, 'unread', 'User with id 202000762 has upvoted your project.', '2024-06-07 00:35:22'),
+(84, 121, 809000586, 'project_status_update', 33, 'unread', 'Your project has been accepted by Professor Abdelrahman', '2024-06-07 00:39:22'),
+(85, 122, 809000586, 'project_status_update', 33, 'unread', 'Your project has been accepted by Professor Abdelrahman', '2024-06-07 00:39:22'),
+(86, 123, 809000586, 'project_status_update', 33, 'unread', 'Your project has been accepted by Professor Abdelrahman', '2024-06-07 00:39:22'),
+(87, 20200076, 809000586, 'project_status_update', 34, 'unread', 'Your project has been rejected by Professor Abdelrahman', '2024-06-07 00:39:23'),
+(88, 20200024, 809000586, 'project_status_update', 34, 'unread', 'Your project has been rejected by Professor Abdelrahman', '2024-06-07 00:39:23');
+
 -- --------------------------------------------------------
 
 --
@@ -133,9 +182,10 @@ CREATE TABLE `professor` (
 --
 
 INSERT INTO `professor` (`professor_id`, `professor_name`, `professor_email`, `professor_password`, `professor_department`, `professor_token`, `reset_password_token`, `reset_password_expires`) VALUES
-(809000586, 'Abdelrahman', 'Ebnelnas@fci.helwan.edu.eg', '$2b$10$a.pB3OEu/PHOoeBGgZmawOH7T9gomGVIZBNOgnqjaIYURZs0wqBxe', 'cs', 'b977b6c231f130f19df2aa0bc109f1bc', NULL, NULL),
+(20200, 'Abdelrahman ahmed', 'abdo0o00.ahmed@fci.helwan.edu.eg', '$2b$10$hRL/SnKx1d5s67xQnEpS0eT7bgtIUVGg4b9DGiDfPqmWfVjYZ5R.W', 'Computer Science', '9daec50ca8ca7806ea4ace97d3c42f2b', NULL, NULL),
+(202020, 'Mohamed zain', 'john@fci.helwan.edu.eg', '$2b$10$/6sh0q/ljw3Sy11263wTb.DxuYy/sXC5qCywnY4Sn/ycB0MgwHw1.', 'Computer Science', 'e4278d576a817192f8e54bd3a95b14df', NULL, NULL),
 (202000496, 'Hany Abdelrazek', 'hanyhany@fci.helwan.edu.eg', '$2b$10$Xpqq1qOtAtFB760uVb7inuF8Az09xDhXUUW5FN7t6TJlNvT5nTpvu', 'is', '1090d36f6a263870b47346abca52750d', NULL, NULL),
-(20200, 'Abdelrahman ahmed', 'abdo0o00.ahmed@fci.helwan.edu.eg', '$2b$10$hRL/SnKx1d5s67xQnEpS0eT7bgtIUVGg4b9DGiDfPqmWfVjYZ5R.W', 'Computer Science', '9daec50ca8ca7806ea4ace97d3c42f2b', NULL, NULL);
+(809000586, 'Abdelrahman', 'Ebnelnas@fci.helwan.edu.eg', '$2b$10$a.pB3OEu/PHOoeBGgZmawOH7T9gomGVIZBNOgnqjaIYURZs0wqBxe', 'cs', '11b64be21f3505c499a80ce58b8c4ddd', NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -150,7 +200,7 @@ CREATE TABLE `projects` (
   `supervisor_name` varchar(255) DEFAULT NULL,
   `graduation_year` int(11) DEFAULT NULL,
   `graduation_term` enum('June','January','Summer') DEFAULT NULL,
-  `department_name` enum('Computer Science','Information Systems','Information Technology','Artificial Intelligence') DEFAULT NULL,
+  `department_name` enum('Computer Science','Information Systems','Information Technology') DEFAULT NULL,
   `project_files_path` varchar(255) DEFAULT NULL,
   `github_link` varchar(255) DEFAULT NULL,
   `approval_status` enum('Pending','Approved','Rejected') DEFAULT 'Pending',
@@ -166,17 +216,17 @@ CREATE TABLE `projects` (
 INSERT INTO `projects` (`project_id`, `title`, `description`, `supervisor_name`, `graduation_year`, `graduation_term`, `department_name`, `project_files_path`, `github_link`, `approval_status`, `total_votes`, `professor_id`, `registration_date`) VALUES
 (1, 'ay klam', 'hello', 'mar3333eeeeeeeeeeee', 2023, 'June', 'Information Systems', NULL, 'ay 7aga', 'Approved', 6, NULL, '2024-05-06'),
 (2, 'Project Title123', 'gthgtughurrreuifhfhhfj', 'Supervisor Name', 2024, 'June', 'Information Technology', NULL, 'https://github.com/example/project', 'Rejected', 1, NULL, NULL),
-(3, 'hamadahamada', 'hamadahamada', 'hamadahamada', 2022, 'June', 'Artificial Intelligence', NULL, 'hamada.com/github_link ', 'Pending', 0, NULL, NULL),
+(3, 'hamadahamada', 'hamadahamada', 'hamadahamada', 2022, 'June', '', NULL, 'hamada.com/github_link ', 'Pending', 0, NULL, NULL),
 (4, 'GPMS', 'kter', 'DR MAray', 2021, 'Summer', 'Information Systems', 'project_files\\1714685518174.rar', 'hamada.com/github_link ', 'Pending', 0, NULL, NULL),
 (5, 'hamadahamada1333', 'hamadahamada', 'hamadahamada111', 2023, 'January', 'Computer Science', NULL, 'hamada.com/github_link ', 'Pending', 0, NULL, NULL),
-(28, 'ay klam', 'hello', 'mar3333eeeeeeeeeeee', 2024, 'January', 'Computer Science', NULL, 'ay 7aga', 'Pending', 0, NULL, NULL),
+(28, 'ay klam', 'hello', 'mar3333eeeeeeeeeeee', 2024, 'January', 'Computer Science', NULL, 'ay 7aga', 'Pending', 1, NULL, NULL),
 (29, 'ay klam faaaddy', 'hedddd', 'manaaaaal', 2025, 'Summer', 'Information Systems', NULL, 'ta3ban', 'Pending', 0, NULL, NULL),
-(30, 'ay klam faaaddy', 'hedddd', 'manaaaaal', 2021, 'June', 'Information Systems', NULL, 'ta3ban', 'Approved', 0, NULL, NULL),
-(31, 'ay klam faaaddy', 'hedddd', 'manaaaaal', 2021, 'January', 'Information Systems', NULL, 'ta3ban', 'Approved', 0, NULL, '2024-05-05'),
+(30, 'ay klam faaaddy', 'hedddd', 'manaaaaal', 2021, 'June', 'Information Systems', NULL, 'ta3ban', 'Approved', 1, NULL, NULL),
+(31, 'ay klam faaaddy', 'hedddd', 'manaaaaal', 2021, 'January', 'Information Systems', NULL, 'ta3ban', 'Approved', 1, NULL, '2024-05-05'),
 (32, 'ay klam faaaddy', 'hedddd', 'manaaaaal', 2023, 'Summer', 'Computer Science', NULL, 'ta3ban', 'Pending', 0, NULL, NULL),
-(33, 'ay klam faaaddy', 'hedddd', 'manaaaaal', 2024, 'January', 'Information Systems', NULL, 'ta3ban', 'Pending', 0, 809000586, NULL),
-(34, 'Sample Project', 'This is a sample project description', 'Mohamed Maray', 2022, 'January', 'Information Technology', 'project_files\\1715007907218.png', 'https://github.com/sample/project', 'Pending', 0, 809000586, NULL),
-(35, 'ay klam faaaddy', 'hedddd', 'manaaaaal', 2022, 'Summer', 'Artificial Intelligence', NULL, 'ta3ban', 'Pending', 0, NULL, NULL),
+(33, 'ay klam faaaddy', 'hedddd', 'manaaaaal', 2024, 'January', 'Information Systems', NULL, 'ta3ban', 'Approved', 0, 809000586, '2024-06-07'),
+(34, 'Sample Project', 'This is a sample project description', 'Mohamed Maray', 2022, 'January', 'Information Technology', 'project_files\\1715007907218.png', 'https://github.com/sample/project', 'Rejected', 0, 809000586, NULL),
+(35, 'ay klam faaaddy', 'hedddd', 'manaaaaal', 2022, 'Summer', '', NULL, 'ta3ban', 'Pending', 0, NULL, NULL),
 (36, 'ay klam faaaddy', 'hedddd', 'manaaaaal', 2023, 'Summer', 'Computer Science', NULL, 'ta3ban', 'Pending', 0, NULL, NULL),
 (37, 'zain', 'zain', 'Maray', 2024, 'June', 'Information Systems', 'project_files\\1715094311267.rar', 'zain.com', 'Pending', 0, 20200, NULL),
 (38, 'zain', 'zain bardo', 'Maray', 2025, 'June', 'Information Systems', 'project_files\\1715050538588.png', 'zain.com', 'Pending', 0, 20200, NULL);
@@ -200,7 +250,8 @@ INSERT INTO `project_professor` (`project_id`, `professor_id`) VALUES
 (30, 809000586),
 (30, 809000586),
 (31, 809000586),
-(1, 20200);
+(1, 20200),
+(33, 809000586);
 
 -- --------------------------------------------------------
 
@@ -299,7 +350,6 @@ CREATE TABLE `students` (
 --
 
 INSERT INTO `students` (`student_id`, `student_name`, `student_email`, `student_password`, `student_department`, `student_token`, `reset_password_token`, `reset_password_expires`) VALUES
-(0, 'Mohamed zain', 'john.doe@fci.helwan.edu.eg', '$2b$10$wkVr6uuRfdajrSQ07t/OAuOBwn8exc0847FDEWKq4Y0iX/bQhf58S', '', 'd5fde16db6375adc6687a3beb23588e6', NULL, NULL),
 (7, 'Mohamed Zain', 'Mohamed_Zain@fci.helwan.edu.eg', '$2b$10$HboC7yQbxbNbfNAGhnrif.n0H/0Br6xw1bORhSzRUYqPlSk.vQYwG', NULL, '64fa3d60ebb4be5d98e65ac11b129971', NULL, NULL),
 (8, 'Mohamed Ahmed', 'Mohamed_Ahmed@fci.helwan.edu.eg', '$2b$10$h3qVOArAI..W4ZdIDvH6/uyBXKMGPq9khAOrio.TrTye5UH1M48i6', NULL, '6ef85404ec5c8b999f5f703584379e37', NULL, NULL),
 (9, 'admin admin', 'admin@fci.helwan.edu.eg', '$2b$10$Rrz45r/CQ1JT3P9H12MYMOYcNMZJb2UDp3g7mxELtvWvtJpxntdBy', NULL, '', NULL, NULL),
@@ -308,7 +358,7 @@ INSERT INTO `students` (`student_id`, `student_name`, `student_email`, `student_
 (202000245, 'Hazem hamdy', 'hazem@fci.helwan.edu.eg', '$2b$10$.wt2iATEk/59LHhiQEouOeOSGXapJTmfbLVDIVojzg6naWmY85aKi', 'Software Engineering', '79673a812778cc0556aaa47818ce0bb4', NULL, NULL),
 (202000760, '’Mohamed Zain', 'Mohamedzain235@fci.helwan.edu.eg', '$2b$10$.2axmfsaKj2EcgKFbnGqv.uhfu8FPJWmIWAEkk3NWcBufhaK8IBla', 'Information systems', 'f940a7a81f9a45bfd8f0dc715b6c8e70', NULL, NULL),
 (202000761, 'Mohamed Zain', 'jon@fci.helwan.edu.eg', '$2b$10$vlsDivDwlWUXlpuoZ121p.3HuvqNDWhdo3DlmNv.VoXhFB/0qKPv6', 'Software Engineering', 'e210490bdddfb37828ec7a9e8b8604cd', NULL, NULL),
-(202000762, 'Mohamed Zain', 'Mohamedzain1122355@fci.helwan.edu.eg', '$2b$10$Dllk9xz7/7N1QO.6eb9Z0uNfNAwb/gp4pjvRYWsFy/BKKfMU32EaG', 'Software Engineering', '3c3a2bab1983d7f9272975c8ae891c4e', NULL, NULL);
+(202000762, 'Mohamed Zain', 'Mohamedzai@fci.helwan.edu.eg', '$2b$10$67/Kw9OgUj29o.X1e74C8uUGNbhATI.ynlR9NB80aXZYu4xE9v8Jy', 'Software Engineering', '8bd141c0d021701ee86a782dd44cdda2', NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -328,7 +378,10 @@ CREATE TABLE `votes` (
 --
 
 INSERT INTO `votes` (`vote_id`, `project_id`, `student_id`, `timestamp`) VALUES
-(3, 1, 202000762, '2024-05-06 12:26:58');
+(5, 28, 202000762, '2024-06-06 21:31:49'),
+(7, 31, 202000762, '2024-06-06 21:32:42'),
+(8, 30, 202000762, '2024-06-06 21:32:43'),
+(15, 1, 202000762, '2024-06-06 21:35:22');
 
 --
 -- Indexes for dumped tables
@@ -367,6 +420,8 @@ ALTER TABLE `notifications`
 -- Indexes for table `professor`
 --
 ALTER TABLE `professor`
+  ADD UNIQUE KEY `professor_id` (`professor_id`),
+  ADD UNIQUE KEY `professor_email` (`professor_email`),
   ADD KEY `professor_id_index` (`professor_id`);
 
 --
@@ -414,19 +469,19 @@ ALTER TABLE `admin`
 -- AUTO_INCREMENT for table `bookmarks`
 --
 ALTER TABLE `bookmarks`
-  MODIFY `bookmark_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `bookmark_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
 -- AUTO_INCREMENT for table `comments`
 --
 ALTER TABLE `comments`
-  MODIFY `comment_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
+  MODIFY `comment_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
 
 --
 -- AUTO_INCREMENT for table `notifications`
 --
 ALTER TABLE `notifications`
-  MODIFY `notification_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=42;
+  MODIFY `notification_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=89;
 
 --
 -- AUTO_INCREMENT for table `projects`
@@ -438,7 +493,7 @@ ALTER TABLE `projects`
 -- AUTO_INCREMENT for table `votes`
 --
 ALTER TABLE `votes`
-  MODIFY `vote_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `vote_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
 -- Constraints for dumped tables
