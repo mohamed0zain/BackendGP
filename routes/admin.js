@@ -8,6 +8,21 @@ const crypto = require("crypto");
 
 const isAdmin = require("../middleware/isAdmin");
 
+
+
+router.get("/all", isAdmin, (req, res) => {
+  conn.query(
+    "SELECT project_id, title, description, supervisor_name, graduation_year, graduation_term, department_name, project_files_path, github_link, approval_status, total_votes FROM projects",
+    (err, results) => {
+      if (err) {
+        res.status(500).json({ error: "Error fetching projects" });
+      } else {
+        res.status(200).json(results);
+      }
+    }
+  );
+});
+
 // Add admin
 router.post(
   "/add-admin",

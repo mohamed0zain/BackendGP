@@ -11,7 +11,7 @@ router.get("/:student_id/grades", isStudent ,async (req, res) => {
 
         const query = util.promisify(conn.query).bind(conn);
         const grades = await query(
-            "SELECT project_id, semester_work_grade, final_work_grade, max_semester_work_grade, max_final_work_grade FROM project_students WHERE student_id = ?",
+            "SELECT project_id, semester_work_grade, final_work_grade, max_semester_work_grade, max_final_work_grade, overall_grade, max_overall_grade FROM project_students WHERE student_id = ?",
             [studentId]
         );
 

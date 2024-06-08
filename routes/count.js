@@ -306,7 +306,7 @@ router.get('/average-grades-by-graduation-year', async (req, res) => {
         p.graduation_year AS year,
         AVG(ps.semester_work_grade) AS avg_semester_work_grade,
         AVG(ps.final_work_grade) AS avg_final_work_grade,
-        AVG((ps.semester_work_grade + ps.final_work_grade) / 2) AS avg_overall_grade
+        AVG(ps.semester_work_grade + ps.final_work_grade) AS avg_overall_grade
       FROM 
         project_students ps
       JOIN 
@@ -334,6 +334,7 @@ router.get('/average-grades-by-graduation-year', async (req, res) => {
   }
 });
 
+
 // Get average grades by graduation term
 router.get('/average-grades-by-graduation-term', async (req, res) => {
   try {
@@ -342,7 +343,7 @@ router.get('/average-grades-by-graduation-term', async (req, res) => {
         p.graduation_term AS term,
         AVG(ps.semester_work_grade) AS avg_semester_work_grade,
         AVG(ps.final_work_grade) AS avg_final_work_grade,
-        AVG((ps.semester_work_grade + ps.final_work_grade) / 2) AS avg_overall_grade
+        AVG(ps.semester_work_grade + ps.final_work_grade) AS avg_overall_grade
       FROM 
         project_students ps
       JOIN 
@@ -369,6 +370,7 @@ router.get('/average-grades-by-graduation-term', async (req, res) => {
     res.status(500).json({ error: 'Server error' });
   }
 });
+
 
 // succes rate by department
 router.get('/success-rate-by-department', async (req, res) => {
